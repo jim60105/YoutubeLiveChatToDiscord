@@ -1,0 +1,9 @@
+version: '3.7'
+
+services:
+  youtubelivechattodiscord:
+    image: ghcr.io/jim60105/youtubelivechattodiscord
+    # build: .
+    restart: unless-stopped
+    # Youtube videoId, discord webhook url
+    command: ["", ""]
