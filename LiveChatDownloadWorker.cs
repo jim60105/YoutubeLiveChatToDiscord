@@ -1,7 +1,7 @@
 ﻿using YoutubeDLSharp;
 using YoutubeDLSharp.Options;
 
-namespace LiveChatToDiscord;
+namespace YoutubeLiveChatToDiscord;
 
 public class LiveChatDownloadWorker : BackgroundService
 {

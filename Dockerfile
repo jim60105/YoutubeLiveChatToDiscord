@@ -9,17 +9,17 @@ RUN apk add --no-cache --virtual build-deps musl-dev gcc &&\
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["LiveChatToDiscord.csproj", "."]
-RUN dotnet restore "./LiveChatToDiscord.csproj"
+COPY ["YoutubeLiveChatToDiscord.csproj", "."]
+RUN dotnet restore "./YoutubeLiveChatToDiscord.csproj"
 COPY . .
 WORKDIR "/src/."
-RUN dotnet build "LiveChatToDiscord.csproj" -c Release -o /app/build
+RUN dotnet build "YoutubeLiveChatToDiscord.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "LiveChatToDiscord.csproj" -c Release -o /app/publish
+RUN dotnet publish "YoutubeLiveChatToDiscord.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENV VIDEOID=
-ENTRYPOINT ["dotnet", "LiveChatToDiscord.dll"]
+ENTRYPOINT ["dotnet", "YoutubeLiveChatToDiscord.dll"]

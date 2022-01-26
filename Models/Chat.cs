@@ -1,4 +1,4 @@
-﻿namespace LiveChatToDiscord.Models;
+﻿namespace YoutubeLiveChatToDiscord.Models;
 
 // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
 #pragma warning disable IDE1006 // 命名樣式

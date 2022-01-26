@@ -1,9 +1,9 @@
 using Discord;
 using Discord.Webhook;
-using LiveChatToDiscord.Models;
+using YoutubeLiveChatToDiscord.Models;
 using Newtonsoft.Json;
 
-namespace LiveChatToDiscord
+namespace YoutubeLiveChatToDiscord
 {
     public class LiveChatMonitorWorker : BackgroundService
     {

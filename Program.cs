@@ -1,5 +1,5 @@
 using Discord.Webhook;
-using LiveChatToDiscord;
+using YoutubeLiveChatToDiscord;
 
 Environment.SetEnvironmentVariable("VIDEOID", Environment.GetCommandLineArgs()[1]);
 Environment.SetEnvironmentVariable("WEBHOOK", Environment.GetCommandLineArgs()[2]);
