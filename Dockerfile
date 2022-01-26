@@ -21,5 +21,4 @@ RUN dotnet publish "YoutubeLiveChatToDiscord.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENV VIDEOID=
 ENTRYPOINT ["dotnet", "YoutubeLiveChatToDiscord.dll"]

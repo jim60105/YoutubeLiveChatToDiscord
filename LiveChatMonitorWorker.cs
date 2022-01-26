@@ -76,7 +76,7 @@ namespace YoutubeLiveChatToDiscord
                 var eb = new EmbedBuilder();
                 eb.WithDescription(string.Join("", runs.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))));
                 //eb.WithAuthor(author, authorPhoto);
-                eb.WithTitle("[ÂI¦¹«e©¹¼v¤ù]");
+                eb.WithTitle("[é»æ­¤å‰å¾€å½±ç‰‡]");
                 eb.WithUrl($"https://youtu.be/{id}");
                 eb.WithFooter(new EmbedFooterBuilder().WithText(id));
 

@@ -1,4 +1,4 @@
-﻿using YoutubeDLSharp;
+using YoutubeDLSharp;
 using YoutubeDLSharp.Options;
 
 namespace YoutubeLiveChatToDiscord;
