@@ -1,11 +1,11 @@
 using Discord.Webhook;
 using YoutubeLiveChatToDiscord;
 
-Environment.SetEnvironmentVariable("VIDEOID", Environment.GetCommandLineArgs()[1]);
+Environment.SetEnvironmentVariable("VIDEO_ID", Environment.GetCommandLineArgs()[1]);
 Environment.SetEnvironmentVariable("WEBHOOK", Environment.GetCommandLineArgs()[2]);
 
 IEnumerable<string> oldFiles = Directory.GetFiles(Directory.GetCurrentDirectory())
-                                        .Where(p => p.Contains($"{Environment.GetEnvironmentVariable("VIDEOID")}.live_chat.json"));
+                                        .Where(p => p.Contains($"{Environment.GetEnvironmentVariable("VIDEO_ID")}.live_chat.json"));
 foreach (var file in oldFiles)
 {
     File.Delete(file);

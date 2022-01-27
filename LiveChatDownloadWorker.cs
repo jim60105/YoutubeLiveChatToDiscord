@@ -13,7 +13,7 @@ public class LiveChatDownloadWorker : BackgroundService
     {
         logger = _logger;
 
-        id = Environment.GetEnvironmentVariable("VIDEOID") ?? "";
+        id = Environment.GetEnvironmentVariable("VIDEO_ID") ?? "";
         if (string.IsNullOrEmpty(id)) throw new ArgumentException(nameof(id));
 
         YtdlPath = WhereIsYt_dlp();
@@ -22,7 +22,7 @@ public class LiveChatDownloadWorker : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        OptionSet optionSet = new()
+        OptionSet live_chatOptionSet = new()
         {
             IgnoreConfig = true,
             WriteSub = true,
@@ -31,16 +31,31 @@ public class LiveChatDownloadWorker : BackgroundService
             NoPart = true,
             Output = "%(id)s"
         };
-        optionSet.AddCustomOption("--ignore-no-formats-error", "");
+        live_chatOptionSet.AddCustomOption("--ignore-no-formats-error", true);
+
+        OptionSet info_jsonOptionSet = new()
+        {
+            IgnoreConfig = true,
+            WriteInfoJson = true,
+            SkipDownload = true,
+            NoPart = true,
+            Output = "%(id)s"
+        };
+        info_jsonOptionSet.AddCustomOption("--ignore-no-formats-error", true);
 
         YoutubeDLProcess ytdlProc = new(YtdlPath);
         ytdlProc.OutputReceived += (o, e) => logger.LogTrace("{message}", e.Data);
         ytdlProc.ErrorReceived += (o, e) => logger.LogError("{error}", e.Data);
 
-        logger.LogInformation("Start yt-dlp!");
-        return ytdlProc.RunAsync(new string[] { $"\"{id}\"" },
-                                 optionSet,
-                                 stoppingToken);
+        string url = $"https://www.youtube.com/watch?v={id}";
+
+        logger.LogInformation("Start yt-dlp with url: {url}", url);
+        return ytdlProc.RunAsync(new string[] { url },
+                                 info_jsonOptionSet,
+                                 stoppingToken)
+                       .ContinueWith((e) => ytdlProc.RunAsync(new string[] { url },
+                                                              live_chatOptionSet,
+                                                              stoppingToken));
     }
 
     public static string WhereIsYt_dlp()

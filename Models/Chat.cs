@@ -1,15 +1,18 @@
 ﻿namespace YoutubeLiveChatToDiscord.Models;
 
-/* These POCOs are generated from the results by the code generator. */
+/* These POCOs are generated from the results by the code generator.
+ * https://json2csharp.com/
+ */
 
-// Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
+// Chat myDeserializedClass = JsonConvert.DeserializeObject<Chat>(myJsonResponse);
+
 #pragma warning disable IDE1006 // 命名樣式
-public class Thumbnail
-{
-    public string? url { get; set; }
-    public int width { get; set; }
-    public int height { get; set; }
-}
+//public class Thumbnail
+//{
+//    public string? url { get; set; }
+//    public int width { get; set; }
+//    public int height { get; set; }
+//}
 
 public class AccessibilityData
 {

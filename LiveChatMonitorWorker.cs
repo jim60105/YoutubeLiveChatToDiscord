@@ -19,7 +19,7 @@ namespace YoutubeLiveChatToDiscord
             (logger, client) = (_logger, _client);
             client.Log += Client_Log;
 
-            id = Environment.GetEnvironmentVariable("VIDEOID") ?? "";
+            id = Environment.GetEnvironmentVariable("VIDEO_ID") ?? "";
             if (string.IsNullOrEmpty(id)) throw new ArgumentException(nameof(id));
 
             liveChatFileInfo = new($"{id}.live_chat.json");
@@ -34,6 +34,9 @@ namespace YoutubeLiveChatToDiscord
                 await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
                 liveChatFileInfo.Refresh();
             }
+
+            await GetVideoInfo(stoppingToken);
+
             logger.LogInformation("Start Monitoring!");
 
             using StreamReader sr = new(liveChatFileInfo.OpenRead());
@@ -51,25 +54,50 @@ namespace YoutubeLiveChatToDiscord
                     continue;
                 }
 
-                sr.BaseStream.Seek(position, SeekOrigin.Begin);
-                while (position < sr.BaseStream.Length)
+                await ProcessChats(sr, stoppingToken);
+            }
+        }
+
+        private async Task GetVideoInfo(CancellationToken stoppingToken)
+        {
+            FileInfo videoInfo = new($"{id}.info.json");
+            while (!videoInfo.Exists && !stoppingToken.IsCancellationRequested)
+            {
+                logger.LogInformation("{jsonFile} not found.", videoInfo.FullName);
+                logger.LogInformation($"Wait for {nameof(LiveChatDownloadWorker)} to start.");
+                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                videoInfo.Refresh();
+            }
+            Info? info = JsonConvert.DeserializeObject<Info>(await new StreamReader(videoInfo.OpenRead()).ReadToEndAsync());
+            string? Title = info?.title;
+            string? ChannelId = info?.uploader_id;
+            string? thumb = info?.thumbnail;
+
+            Environment.SetEnvironmentVariable("TITLE", Title);
+            Environment.SetEnvironmentVariable("CHANNEL_ID", ChannelId);
+            Environment.SetEnvironmentVariable("VIDEO_THUMB", thumb);
+        }
+
+        private async Task ProcessChats(StreamReader sr, CancellationToken stoppingToken)
+        {
+            sr.BaseStream.Seek(position, SeekOrigin.Begin);
+            while (position < sr.BaseStream.Length)
+            {
+                try
                 {
-                    try
-                    {
-                        string? str = await sr.ReadLineAsync();
-                        if (string.IsNullOrEmpty(str)) continue;
+                    string? str = await sr.ReadLineAsync();
+                    if (string.IsNullOrEmpty(str)) continue;
 
-                        Chat? chat = JsonConvert.DeserializeObject<Chat>(str);
-                        position = sr.BaseStream.Position;
-                        if (null == chat) continue;
+                    Chat? chat = JsonConvert.DeserializeObject<Chat>(str);
+                    position = sr.BaseStream.Position;
+                    if (null == chat) continue;
 
-                        await BuildRequestAndSendToDiscord(chat, stoppingToken);
-                    }
-                    catch (JsonSerializationException e)
-                    {
-                        logger.LogError("{error}", e);
-                        position = sr.BaseStream.Position;
-                    }
+                    await BuildRequestAndSendToDiscord(chat, stoppingToken);
+                }
+                catch (JsonSerializationException e)
+                {
+                    logger.LogError("{error}", e);
+                    position = sr.BaseStream.Position;
                 }
             }
         }
@@ -78,24 +106,35 @@ namespace YoutubeLiveChatToDiscord
         {
             LiveChatTextMessageRenderer? lctmr = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatTextMessageRenderer;
             List<Run>? runs = lctmr?.message?.runs;
-            string author = lctmr?.authorName?.simpleText ?? "";
-            string authorPhoto = lctmr?.authorPhoto?.thumbnails?.LastOrDefault()?.url ?? "";
 
             if (null != runs)
             {
-                var eb = new EmbedBuilder();
-                eb.WithDescription(string.Join("", runs.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))));
-                //eb.WithAuthor(author, authorPhoto);
-                eb.WithTitle("[點此前往影片]");
-                eb.WithUrl($"https://youtu.be/{id}");
-                eb.WithFooter(new EmbedFooterBuilder().WithText($"{id}, {lctmr?.timestampUsec}"));
+                string author = lctmr?.authorName?.simpleText ?? "";
+                string authorPhoto = lctmr?.authorPhoto?.thumbnails?.LastOrDefault()?.url ?? "";
+                long timeStamp = long.TryParse(lctmr?.timestampUsec, out long l) ? l / 1000 : 0;
+
+                EmbedBuilder eb = new();
+                eb.WithDescription(string.Join("", runs.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))))
+                  .WithTitle(Environment.GetEnvironmentVariable("TITLE") ?? "")
+                  .WithUrl($"https://youtu.be/{id}")
+                  .WithThumbnailUrl(Environment.GetEnvironmentVariable("VIDEO_THUMB"))
+                  .WithAuthor(new EmbedAuthorBuilder().WithName(author)
+                                                      .WithUrl($"https://www.youtube.com/channel/{lctmr?.authorExternalChannelId}")
+                                                      .WithIconUrl(authorPhoto));
+                if (lctmr?.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
+                {
+                    eb.WithColor(Color.Gold);
+                }
+
+                EmbedFooterBuilder ft = new();
+                ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp).LocalDateTime.ToString())
+                  .WithIconUrl(lctmr?.authorBadges?.FirstOrDefault()?.liveChatAuthorBadgeRenderer?.customThumbnail?.thumbnails?.LastOrDefault()?.url ?? "");
+                eb.WithFooter(ft);
 
                 try
                 {
-                    logger.LogDebug("Sending Request to Discord: {author}, {message}", author, eb.Description);
-                    ulong messageId = await client.SendMessageAsync(embeds: new Embed[] { eb.Build() },
-                                                                username: author,
-                                                                avatarUrl: authorPhoto);
+                    logger.LogDebug("Sending Request to Discord: {author}: {message}", author, eb.Description);
+                    ulong messageId = await client.SendMessageAsync(embeds: new Embed[] { eb.Build() });
                     logger.LogDebug("Message sent to discord, message id: {messageId}", messageId);
 
                     // The rate for Discord webhooks are 30 requests/minute per channel.
