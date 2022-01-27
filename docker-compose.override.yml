@@ -1,9 +1,12 @@
 # Override logging settings to LogServer
 version: '3.7'
 
+x-logging:
+  &default-logging
+  driver: "gelf"
+  options:
+    gelf-address: "udp://127.0.0.1:12201"
+
 services:
   youtubelivechattodiscord:
-    logging:
-      driver: "gelf"
-      options:
-        gelf-address: "udp://127.0.0.1:12201"
+    logging: *default-logging
