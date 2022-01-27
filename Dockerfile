@@ -3,9 +3,10 @@
 FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine AS base
 WORKDIR /app
 RUN apk add --no-cache --virtual build-deps musl-dev gcc &&\
-    apk add --no-cache py3-pip &&\
+    apk add --no-cache py3-pip tzdata &&\
     pip install --upgrade yt-dlp &&\
     apk del build-deps
+ENV TZ=Asia/Taipei
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src

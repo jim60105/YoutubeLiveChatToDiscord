@@ -23,3 +23,7 @@
 ```sh
 docker run -rm ghcr.io/jim60105/youtubelivechattodiscord [Video_Id] [Discord_Webhook_Url]
 ```
+
+### Timezone
+
+Default timezone is Asia/Taipei. Please change it with `TZ` environment variable.

@@ -127,7 +127,9 @@ namespace YoutubeLiveChatToDiscord
                 }
 
                 EmbedFooterBuilder ft = new();
-                ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp).LocalDateTime.ToString())
+                ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
+                                          .LocalDateTime
+                                          .ToString("yyyy/MM/dd HH:mm:ss"))
                   .WithIconUrl(lctmr?.authorBadges?.FirstOrDefault()?.liveChatAuthorBadgeRenderer?.customThumbnail?.thumbnails?.LastOrDefault()?.url ?? "");
                 eb.WithFooter(ft);
 

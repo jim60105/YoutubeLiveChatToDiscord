@@ -455,3 +455,4 @@ $RECYCLE.BIN/
 
 *.live_chat.json*
 Properties/launchSettings.json
+*.info.json
