@@ -16,5 +16,5 @@
 - Discord Webhook網址
 
 ```sh
-docker run -rm ghcr.io/jim60105/youtubelivechattodiscord [VideoId] [Discord_Webhook_Url]
+docker run -rm ghcr.io/jim60105/youtubelivechattodiscord [Video_Id] [Discord_Webhook_Url]
 ```
