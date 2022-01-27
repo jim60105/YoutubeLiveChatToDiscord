@@ -1,5 +1,7 @@
 ﻿namespace YoutubeLiveChatToDiscord.Models;
 
+/* These POCOs are generated from the results by the code generator. */
+
 // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
 #pragma warning disable IDE1006 // 命名樣式
 public class Thumbnail
