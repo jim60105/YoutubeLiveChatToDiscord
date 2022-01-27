@@ -38,7 +38,7 @@ public class LiveChatDownloadWorker : BackgroundService
         ytdlProc.ErrorReceived += (o, e) => logger.LogError("{error}", e.Data);
 
         logger.LogInformation("Start yt-dlp!");
-        return ytdlProc.RunAsync(new string[] { id },
+        return ytdlProc.RunAsync(new string[] { $"\"{id}\"" },
                                  optionSet,
                                  stoppingToken);
     }
