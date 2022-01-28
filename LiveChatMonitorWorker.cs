@@ -112,48 +112,130 @@ namespace YoutubeLiveChatToDiscord
 
         private async Task BuildRequestAndSendToDiscord(Chat chat, CancellationToken stoppingToken)
         {
-            LiveChatTextMessageRenderer? lctmr = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatTextMessageRenderer;
-            List<Run>? runs = lctmr?.message?.runs;
+            EmbedBuilder eb = new();
+            eb.WithTitle(Environment.GetEnvironmentVariable("TITLE") ?? "")
+              .WithUrl($"https://youtu.be/{id}")
+              .WithThumbnailUrl(Environment.GetEnvironmentVariable("VIDEO_THUMB"));
+            string author = "";
 
-            if (null != runs)
+            LiveChatTextMessageRenderer? liveChatTextMessage = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatTextMessageRenderer;
+            LiveChatPaidMessageRenderer? liveChatPaidMessage = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatPaidMessageRenderer;
+            LiveChatPaidStickerRenderer? liveChatPaidSticker = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatPaidStickerRenderer;
+
+            // Normal Message
+            if (null != liveChatTextMessage)
             {
-                string author = lctmr?.authorName?.simpleText ?? "";
-                string authorPhoto = lctmr?.authorPhoto?.thumbnails?.LastOrDefault()?.url ?? "";
-                long timeStamp = long.TryParse(lctmr?.timestampUsec, out long l) ? l / 1000 : 0;
+                List<Run> runs = liveChatTextMessage.message?.runs ?? new List<Run>();
+                author = liveChatTextMessage.authorName?.simpleText ?? "";
+                string authorPhoto = liveChatTextMessage.authorPhoto?.thumbnails?.LastOrDefault()?.url ?? "";
 
-                EmbedBuilder eb = new();
                 eb.WithDescription(string.Join("", runs.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))))
-                  .WithTitle(Environment.GetEnvironmentVariable("TITLE") ?? "")
-                  .WithUrl($"https://youtu.be/{id}")
-                  .WithThumbnailUrl(Environment.GetEnvironmentVariable("VIDEO_THUMB"))
                   .WithAuthor(new EmbedAuthorBuilder().WithName(author)
-                                                      .WithUrl($"https://www.youtube.com/channel/{lctmr?.authorExternalChannelId}")
+                                                      .WithUrl($"https://www.youtube.com/channel/{liveChatTextMessage.authorExternalChannelId}")
                                                       .WithIconUrl(authorPhoto));
-                if (lctmr?.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
+                // From Stream Owner
+                if (liveChatTextMessage.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
                 {
                     eb.WithColor(Color.Gold);
                 }
 
+                // Timestamp
+                long timeStamp = long.TryParse(liveChatTextMessage.timestampUsec, out long l) ? l / 1000 : 0;
                 EmbedFooterBuilder ft = new();
                 ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
                                           .LocalDateTime
                                           .ToString("yyyy/MM/dd HH:mm:ss"))
-                  .WithIconUrl(lctmr?.authorBadges?.FirstOrDefault()?.liveChatAuthorBadgeRenderer?.customThumbnail?.thumbnails?.LastOrDefault()?.url ?? "");
+                  .WithIconUrl(liveChatTextMessage.authorBadges?.FirstOrDefault()?.liveChatAuthorBadgeRenderer?.customThumbnail?.thumbnails?.LastOrDefault()?.url ?? "");
+                eb.WithFooter(ft);
+            }
+            else if (null != liveChatPaidMessage)
+            // Super Chat
+            {
+                List<Run> runs = liveChatPaidMessage.message?.runs ?? new List<Run>();
+
+                author = liveChatPaidMessage.authorName?.simpleText ?? "";
+                string authorPhoto = liveChatPaidMessage.authorPhoto?.thumbnails?.LastOrDefault()?.url ?? "";
+
+                eb.WithDescription(string.Join("", runs.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))))
+                  .WithAuthor(new EmbedAuthorBuilder().WithName(author)
+                                                      .WithUrl($"https://www.youtube.com/channel/{liveChatPaidMessage.authorExternalChannelId}")
+                                                      .WithIconUrl(authorPhoto));
+                // From Stream Owner
+                if (liveChatPaidMessage.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
+                {
+                    eb.WithColor(Color.Gold);
+                }
+
+                // Timestamp
+                long timeStamp = long.TryParse(liveChatPaidMessage.timestampUsec, out long l) ? l / 1000 : 0;
+                EmbedFooterBuilder ft = new();
+                ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
+                                          .LocalDateTime
+                                          .ToString("yyyy/MM/dd HH:mm:ss"))
+                  .WithIconUrl("https://upload.cc/i1/2022/01/28/uL9JV0.png");
                 eb.WithFooter(ft);
 
-                try
-                {
-                    logger.LogDebug("Sending Request to Discord: {author}: {message}", author, eb.Description);
-                    ulong messageId = await client.SendMessageAsync(embeds: new Embed[] { eb.Build() });
-                    logger.LogDebug("Message sent to discord, message id: {messageId}", messageId);
+                // Super Chat Amount
+                eb.WithFields(new EmbedFieldBuilder[] { new EmbedFieldBuilder().WithName("Amount").WithValue(liveChatPaidMessage.purchaseAmountText?.simpleText) });
 
-                    // The rate for Discord webhooks are 30 requests/minute per channel.
-                    // Be careful when you run multiple instances in the same channel!
-                    logger.LogTrace("Wait 2 seconds for discord webhook rate limit");
-                    await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
-                }
-                catch (TimeoutException) { }
+                // Super Chat Background Color
+                Color bgColor = (Color)System.Drawing.ColorTranslator.FromHtml(string.Format("#{0:X}", liveChatPaidMessage.bodyBackgroundColor));
+                eb.WithColor(bgColor);
             }
+            else if (null != liveChatPaidSticker)
+            // Super Chat Sticker
+            {
+                author = liveChatPaidSticker.authorName?.simpleText ?? "";
+                string authorPhoto = liveChatPaidSticker.authorPhoto?.thumbnails?.LastOrDefault()?.url ?? "";
+
+                eb.WithDescription("")
+                  .WithAuthor(new EmbedAuthorBuilder().WithName(author)
+                                                      .WithUrl($"https://www.youtube.com/channel/{liveChatPaidSticker.authorExternalChannelId}")
+                                                      .WithIconUrl(authorPhoto));
+                // From Stream Owner
+                if (liveChatPaidSticker.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
+                {
+                    eb.WithColor(Color.Gold);
+                }
+
+                // Timestamp
+                long timeStamp = long.TryParse(liveChatPaidSticker.timestampUsec, out long l) ? l / 1000 : 0;
+                EmbedFooterBuilder ft = new();
+                ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
+                                          .LocalDateTime
+                                          .ToString("yyyy/MM/dd HH:mm:ss"))
+                  .WithIconUrl("https://upload.cc/i1/2022/01/28/uL9JV0.png");
+                eb.WithFooter(ft);
+
+                // Super Chat Amount
+                eb.WithFields(new EmbedFieldBuilder[] { new EmbedFieldBuilder().WithName("Amount").WithValue(liveChatPaidSticker.purchaseAmountText?.simpleText) });
+
+                // Super Chat Background Color
+                Color bgColor = (Color)System.Drawing.ColorTranslator.FromHtml(string.Format("#{0:X}", liveChatPaidSticker.backgroundColor));
+                eb.WithColor(bgColor);
+
+                // Super Chat Sticker Picture
+                string? stickerThumbUrl = liveChatPaidSticker.sticker?.thumbnails?.LastOrDefault()?.url;
+                eb.WithThumbnailUrl("https:" + stickerThumbUrl);
+            }
+            else
+            {
+                logger.LogWarning("Message type not supported, skip sending to discord.");
+                return;
+            }
+
+            try
+            {
+                logger.LogDebug("Sending Request to Discord: {author}: {message}", author, eb.Description);
+                ulong messageId = await client.SendMessageAsync(embeds: new Embed[] { eb.Build() });
+                logger.LogDebug("Message sent to discord, message id: {messageId}", messageId);
+
+                // The rate for Discord webhooks are 30 requests/minute per channel.
+                // Be careful when you run multiple instances in the same channel!
+                logger.LogTrace("Wait 2 seconds for discord webhook rate limit");
+                await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+            }
+            catch (TimeoutException) { }
         }
 
         private Task Client_Log(LogMessage arg)
