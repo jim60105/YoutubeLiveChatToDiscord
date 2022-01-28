@@ -204,7 +204,7 @@ namespace YoutubeLiveChatToDiscord
                 ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
                                           .LocalDateTime
                                           .ToString("yyyy/MM/dd HH:mm:ss"))
-                  .WithIconUrl("https://upload.cc/i1/2022/01/28/uL9JV0.png");
+                  .WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/wallet.png");
                 eb.WithFooter(ft);
 
                 // Super Chat Amount
