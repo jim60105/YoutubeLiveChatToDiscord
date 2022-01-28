@@ -12,6 +12,8 @@
     > Discord 方面的限制為，同一頻道中每分鐘可呼叫 Webhook 30次 [ref](https://twitter.com/lolpython/status/967621046277820416)
 - 底層使用 yt-dlp 來抓資料，並不是 youtube api ，沒有額度問題
 - 此工具在閒置時，讀取 yt-dlp 寫的 json 檔案間隔為10秒
+- 啟動時會等待20秒，使 yt-dlp 下載舊留言，再由此開始監控
+    > 如果要跳過此20秒，請傳入環境變數`SKIP_STARTUP_WAITING`
 
 ## Docker
 

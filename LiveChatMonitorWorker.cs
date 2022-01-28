@@ -37,11 +37,19 @@ namespace YoutubeLiveChatToDiscord
 
             await GetVideoInfo(stoppingToken);
 
-            logger.LogInformation("Start Monitoring!");
-
             using StreamReader sr = new(liveChatFileInfo.OpenRead());
+
+#if !DEBUG
+            if (null == Environment.GetEnvironmentVariable("SKIP_STARTUP_WAITING"))
+            {
+                logger.LogInformation("Wait 20 sec to skip old chats");
+                await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
+            }
+#endif
             position = sr.BaseStream.Length;
+
             logger.LogDebug("Start at position: {position}", position);
+            logger.LogInformation("Start Monitoring!");
 
             while (!stoppingToken.IsCancellationRequested)
             {
