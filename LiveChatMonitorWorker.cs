@@ -133,11 +133,6 @@ namespace YoutubeLiveChatToDiscord
                   .WithAuthor(new EmbedAuthorBuilder().WithName(author)
                                                       .WithUrl($"https://www.youtube.com/channel/{liveChatTextMessage.authorExternalChannelId}")
                                                       .WithIconUrl(authorPhoto));
-                // From Stream Owner
-                if (liveChatTextMessage.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
-                {
-                    eb.WithColor(Color.Gold);
-                }
 
                 // Timestamp
                 long timeStamp = long.TryParse(liveChatTextMessage.timestampUsec, out long l) ? l / 1000 : 0;
@@ -146,6 +141,14 @@ namespace YoutubeLiveChatToDiscord
                                           .LocalDateTime
                                           .ToString("yyyy/MM/dd HH:mm:ss"))
                   .WithIconUrl(liveChatTextMessage.authorBadges?.FirstOrDefault()?.liveChatAuthorBadgeRenderer?.customThumbnail?.thumbnails?.LastOrDefault()?.url ?? "");
+
+                // From Stream Owner
+                if (liveChatTextMessage.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
+                {
+                    eb.WithColor(Color.Gold);
+                    ft.WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/crown.png");
+                }
+
                 eb.WithFooter(ft);
             }
             else if (null != liveChatPaidMessage)
@@ -160,11 +163,13 @@ namespace YoutubeLiveChatToDiscord
                   .WithAuthor(new EmbedAuthorBuilder().WithName(author)
                                                       .WithUrl($"https://www.youtube.com/channel/{liveChatPaidMessage.authorExternalChannelId}")
                                                       .WithIconUrl(authorPhoto));
-                // From Stream Owner
-                if (liveChatPaidMessage.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
-                {
-                    eb.WithColor(Color.Gold);
-                }
+
+                // Super Chat Amount
+                eb.WithFields(new EmbedFieldBuilder[] { new EmbedFieldBuilder().WithName("Amount").WithValue(liveChatPaidMessage.purchaseAmountText?.simpleText) });
+
+                // Super Chat Background Color
+                Color bgColor = (Color)System.Drawing.ColorTranslator.FromHtml(string.Format("#{0:X}", liveChatPaidMessage.bodyBackgroundColor));
+                eb.WithColor(bgColor);
 
                 // Timestamp
                 long timeStamp = long.TryParse(liveChatPaidMessage.timestampUsec, out long l) ? l / 1000 : 0;
@@ -173,14 +178,15 @@ namespace YoutubeLiveChatToDiscord
                                           .LocalDateTime
                                           .ToString("yyyy/MM/dd HH:mm:ss"))
                   .WithIconUrl("https://upload.cc/i1/2022/01/28/uL9JV0.png");
+
+                // From Stream Owner
+                if (liveChatPaidMessage.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
+                {
+                    eb.WithColor(Color.Gold);
+                    ft.WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/crown.png");
+                }
+
                 eb.WithFooter(ft);
-
-                // Super Chat Amount
-                eb.WithFields(new EmbedFieldBuilder[] { new EmbedFieldBuilder().WithName("Amount").WithValue(liveChatPaidMessage.purchaseAmountText?.simpleText) });
-
-                // Super Chat Background Color
-                Color bgColor = (Color)System.Drawing.ColorTranslator.FromHtml(string.Format("#{0:X}", liveChatPaidMessage.bodyBackgroundColor));
-                eb.WithColor(bgColor);
             }
             else if (null != liveChatPaidSticker)
             // Super Chat Sticker
@@ -192,20 +198,6 @@ namespace YoutubeLiveChatToDiscord
                   .WithAuthor(new EmbedAuthorBuilder().WithName(author)
                                                       .WithUrl($"https://www.youtube.com/channel/{liveChatPaidSticker.authorExternalChannelId}")
                                                       .WithIconUrl(authorPhoto));
-                // From Stream Owner
-                if (liveChatPaidSticker.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
-                {
-                    eb.WithColor(Color.Gold);
-                }
-
-                // Timestamp
-                long timeStamp = long.TryParse(liveChatPaidSticker.timestampUsec, out long l) ? l / 1000 : 0;
-                EmbedFooterBuilder ft = new();
-                ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
-                                          .LocalDateTime
-                                          .ToString("yyyy/MM/dd HH:mm:ss"))
-                  .WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/wallet.png");
-                eb.WithFooter(ft);
 
                 // Super Chat Amount
                 eb.WithFields(new EmbedFieldBuilder[] { new EmbedFieldBuilder().WithName("Amount").WithValue(liveChatPaidSticker.purchaseAmountText?.simpleText) });
@@ -217,6 +209,23 @@ namespace YoutubeLiveChatToDiscord
                 // Super Chat Sticker Picture
                 string? stickerThumbUrl = liveChatPaidSticker.sticker?.thumbnails?.LastOrDefault()?.url;
                 eb.WithThumbnailUrl("https:" + stickerThumbUrl);
+
+                // Timestamp
+                long timeStamp = long.TryParse(liveChatPaidSticker.timestampUsec, out long l) ? l / 1000 : 0;
+                EmbedFooterBuilder ft = new();
+                ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
+                                          .LocalDateTime
+                                          .ToString("yyyy/MM/dd HH:mm:ss"))
+                  .WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/wallet.png");
+
+                // From Stream Owner
+                if (liveChatPaidSticker.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
+                {
+                    eb.WithColor(Color.Gold);
+                    ft.WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/crown.png");
+                }
+
+                eb.WithFooter(ft);
             }
             else
             {
