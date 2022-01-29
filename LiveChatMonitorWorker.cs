@@ -91,9 +91,10 @@ namespace YoutubeLiveChatToDiscord
             sr.BaseStream.Seek(position, SeekOrigin.Begin);
             while (position < sr.BaseStream.Length)
             {
+                string? str = "";
                 try
                 {
-                    string? str = await sr.ReadLineAsync();
+                    str = await sr.ReadLineAsync() ?? "";
                     if (string.IsNullOrEmpty(str)) continue;
 
                     Chat? chat = JsonConvert.DeserializeObject<Chat>(str);
@@ -104,12 +105,25 @@ namespace YoutubeLiveChatToDiscord
                 }
                 catch (JsonSerializationException e)
                 {
-                    logger.LogError("{error}", e);
+                    logger.LogError("{error}", e.Message);
+                    logger.LogError("{originalString}", str);
                     position = sr.BaseStream.Position;
+                }
+                catch (ArgumentException e)
+                {
+                    logger.LogError("{error}", e.Message);
+                    logger.LogError("originalString", str);
                 }
             }
         }
 
+        /// <summary>
+        /// 建立Discord embed並送出至Webhook
+        /// </summary>
+        /// <param name="chat"></param>
+        /// <param name="stoppingToken"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">訊息格式未支援</exception>
         private async Task BuildRequestAndSendToDiscord(Chat chat, CancellationToken stoppingToken)
         {
             EmbedBuilder eb = new();
@@ -227,10 +241,24 @@ namespace YoutubeLiveChatToDiscord
 
                 eb.WithFooter(ft);
             }
+            // Discrad known garbage messages.
+            else if (
+                // Banner Pinned message.
+                null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addBannerToLiveChatCommand
+                // Click to show less.
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.showLiveChatTooltipCommand
+                // Welcome to live chat! Remember to guard your privacy and abide by our community guidelines.
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatViewerEngagementMessageRenderer
+                // Membership messages.
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatMembershipItemRenderer
+            )
+            {
+                return;
+            }
             else
             {
                 logger.LogWarning("Message type not supported, skip sending to discord.");
-                return;
+                throw new ArgumentException("Message type not supported", nameof(chat));
             }
 
             try

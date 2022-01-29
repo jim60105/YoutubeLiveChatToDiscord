@@ -7,7 +7,7 @@ public class LiveChatDownloadWorker : BackgroundService
 {
     private readonly ILogger<LiveChatDownloadWorker> logger;
     private readonly string id;
-    public string YtdlPath;
+    private readonly string YtdlPath;
 
     public LiveChatDownloadWorker(ILogger<LiveChatDownloadWorker> _logger)
     {
@@ -58,6 +58,10 @@ public class LiveChatDownloadWorker : BackgroundService
                                                               stoppingToken));
     }
 
+    /// <summary>
+    /// 尋找yt-dlp程式路徑
+    /// </summary>
+    /// <returns>Full path of yt-dlp</returns>
     public static string WhereIsYt_dlp()
     {
         // https://stackoverflow.com/a/63021455

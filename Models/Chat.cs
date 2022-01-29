@@ -7,6 +7,7 @@
 // Chat myDeserializedClass = JsonConvert.DeserializeObject<Chat>(myJsonResponse);
 
 #pragma warning disable IDE1006 // 命名樣式
+
 // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
 //public class Thumbnail
 //{
@@ -14,6 +15,28 @@
 //    public int width { get; set; }
 //    public int height { get; set; }
 //}
+
+public class ContextMenuButton
+{
+    public ButtonRenderer? buttonRenderer { get; set; }
+}
+
+public class Icon
+{
+    public string? iconType { get; set; }
+}
+
+public class LiveChatBannerHeaderRenderer
+{
+    public Icon? icon { get; set; }
+    public Text? text { get; set; }
+    public ContextMenuButton? contextMenuButton { get; set; }
+}
+
+public class Header
+{
+    public LiveChatBannerHeaderRenderer? liveChatBannerHeaderRenderer { get; set; }
+}
 
 public class AccessibilityData
 {
@@ -54,6 +77,11 @@ public class Message
     public List<Run>? runs { get; set; }
 }
 
+public class HeaderSubtext
+{
+    public List<Run>? runs { get; set; }
+}
+
 public class AuthorName
 {
     public string? simpleText { get; set; }
@@ -71,6 +99,8 @@ public class WebCommandMetadata
     public string? url { get; set; }
     public string? webPageType { get; set; }
     public int rootVe { get; set; }
+    public string? apiUrl { get; set; }
+    public bool sendPost { get; set; }
 }
 
 public class CommandMetadata
@@ -93,11 +123,6 @@ public class ContextMenuEndpoint
 public class CustomThumbnail
 {
     public List<Thumbnail>? thumbnails { get; set; }
-}
-
-public class Icon
-{
-    public string? iconType { get; set; }
 }
 
 public class LiveChatAuthorBadgeRenderer
@@ -165,6 +190,7 @@ public class UrlEndpoint
 {
     public string? url { get; set; }
     public string? target { get; set; }
+    public bool nofollow { get; set; }
 }
 
 public class NavigationEndpoint
@@ -172,6 +198,13 @@ public class NavigationEndpoint
     public string? clickTrackingParams { get; set; }
     public CommandMetadata? commandMetadata { get; set; }
     public UrlEndpoint? urlEndpoint { get; set; }
+}
+
+public class Command
+{
+    public string? clickTrackingParams { get; set; }
+    public CommandMetadata? commandMetadata { get; set; }
+    public LiveChatItemContextMenuEndpoint? liveChatItemContextMenuEndpoint { get; set; }
 }
 
 public class ButtonRenderer
@@ -183,6 +216,8 @@ public class ButtonRenderer
     public NavigationEndpoint? navigationEndpoint { get; set; }
     public string? trackingParams { get; set; }
     public AccessibilityData? accessibilityData { get; set; }
+    public Icon? icon { get; set; }
+    public Command? command { get; set; }
 }
 
 public class ActionButton
@@ -225,6 +260,20 @@ public class LiveChatPaidStickerRenderer
     public string? trackingParams { get; set; }
 }
 
+public class LiveChatMembershipItemRenderer
+{
+    public string? id { get; set; }
+    public string? timestampUsec { get; set; }
+    public string? authorExternalChannelId { get; set; }
+    public HeaderSubtext? headerSubtext { get; set; }
+    public AuthorName? authorName { get; set; }
+    public AuthorPhoto? authorPhoto { get; set; }
+    public List<AuthorBadge>? authorBadges { get; set; }
+    public ContextMenuEndpoint? contextMenuEndpoint { get; set; }
+    public ContextMenuAccessibility? contextMenuAccessibility { get; set; }
+    public string? trackingParams { get; set; }
+}
+
 public class Item
 {
     public LiveChatTextMessageRenderer? liveChatTextMessageRenderer { get; set; }
@@ -232,6 +281,7 @@ public class Item
     public LiveChatViewerEngagementMessageRenderer? liveChatViewerEngagementMessageRenderer { get; set; }
     public LiveChatPaidStickerRenderer? liveChatPaidStickerRenderer { get; set; }
     public LiveChatTickerPaidMessageItemRenderer? liveChatTickerPaidMessageItemRenderer { get; set; }
+    public LiveChatMembershipItemRenderer? liveChatMembershipItemRenderer { get; set; }
 }
 
 public class AddChatItemAction
@@ -295,12 +345,116 @@ public class AddLiveChatTickerItemAction
     public string? durationSec { get; set; }
 }
 
+public class UiActions
+{
+    public bool hideEnclosingContainer { get; set; }
+}
+
+public class FeedbackEndpoint
+{
+    public string? feedbackToken { get; set; }
+    public UiActions? uiActions { get; set; }
+}
+
+public class ImpressionEndpoint
+{
+    public string? clickTrackingParams { get; set; }
+    public CommandMetadata? commandMetadata { get; set; }
+    public FeedbackEndpoint? feedbackEndpoint { get; set; }
+}
+
+public class AcceptCommand
+{
+    public string? clickTrackingParams { get; set; }
+    public CommandMetadata? commandMetadata { get; set; }
+    public FeedbackEndpoint? feedbackEndpoint { get; set; }
+}
+
+public class DismissCommand
+{
+    public string? clickTrackingParams { get; set; }
+    public CommandMetadata? commandMetadata { get; set; }
+    public FeedbackEndpoint? feedbackEndpoint { get; set; }
+}
+
+public class PromoConfig
+{
+    public string? promoId { get; set; }
+    public List<ImpressionEndpoint>? impressionEndpoints { get; set; }
+    public AcceptCommand? acceptCommand { get; set; }
+    public DismissCommand? dismissCommand { get; set; }
+}
+
+public class DetailsText
+{
+    public List<Run>? runs { get; set; }
+}
+
+public class SuggestedPosition
+{
+    public string? type { get; set; }
+}
+
+public class DismissStrategy
+{
+    public string? type { get; set; }
+}
+
+public class TooltipRenderer
+{
+    public PromoConfig? promoConfig { get; set; }
+    public string? targetId { get; set; }
+    public DetailsText? detailsText { get; set; }
+    public SuggestedPosition? suggestedPosition { get; set; }
+    public DismissStrategy? dismissStrategy { get; set; }
+    public string? dwellTimeMs { get; set; }
+    public string? trackingParams { get; set; }
+}
+
+public class Tooltip
+{
+    public TooltipRenderer? tooltipRenderer { get; set; }
+}
+
+public class ShowLiveChatTooltipCommand
+{
+    public Tooltip? tooltip { get; set; }
+}
+
+public class Contents
+{
+    public LiveChatTextMessageRenderer? liveChatTextMessageRenderer { get; set; }
+}
+
+public class LiveChatBannerRenderer
+{
+    public Header? header { get; set; }
+    public Contents? contents { get; set; }
+    public string? actionId { get; set; }
+    public bool viewerIsCreator { get; set; }
+    public string? targetId { get; set; }
+    public bool isStackable { get; set; }
+    public string? backgroundType { get; set; }
+}
+
+public class BannerRenderer
+{
+    public LiveChatBannerRenderer? liveChatBannerRenderer { get; set; }
+}
+
+public class AddBannerToLiveChatCommand
+{
+    public BannerRenderer? bannerRenderer { get; set; }
+}
+
 public class Action
 {
     public string? clickTrackingParams { get; set; }
     public AddChatItemAction? addChatItemAction { get; set; }
     public MarkChatItemAsDeletedAction? markChatItemAsDeletedAction { get; set; }
     public AddLiveChatTickerItemAction? addLiveChatTickerItemAction { get; set; }
+    public ShowLiveChatTooltipCommand? showLiveChatTooltipCommand { get; set; }
+    public AddBannerToLiveChatCommand? addBannerToLiveChatCommand { get; set; }
 }
 
 public class ReplayChatItemAction
