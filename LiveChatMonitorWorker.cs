@@ -113,7 +113,7 @@ namespace YoutubeLiveChatToDiscord
                 catch (ArgumentException e)
                 {
                     logger.LogError("{error}", e.Message);
-                    logger.LogError("originalString", str);
+                    logger.LogError("{originalString}", str);
                 }
             }
         }
