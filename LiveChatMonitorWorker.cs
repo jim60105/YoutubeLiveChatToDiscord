@@ -1,6 +1,7 @@
 using Discord;
 using Discord.Webhook;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 using YoutubeLiveChatToDiscord.Models;
 
 namespace YoutubeLiveChatToDiscord
@@ -129,7 +130,7 @@ namespace YoutubeLiveChatToDiscord
             EmbedBuilder eb = new();
             eb.WithTitle(Environment.GetEnvironmentVariable("TITLE") ?? "")
               .WithUrl($"https://youtu.be/{id}")
-              .WithThumbnailUrl(Environment.GetEnvironmentVariable("VIDEO_THUMB"));
+              .WithThumbnailUrl(GetOriginalImage(Environment.GetEnvironmentVariable("VIDEO_THUMB")));
             string author = "";
 
             LiveChatTextMessageRenderer? liveChatTextMessage = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatTextMessageRenderer;
@@ -141,7 +142,7 @@ namespace YoutubeLiveChatToDiscord
             {
                 List<Run> runs = liveChatTextMessage.message?.runs ?? new List<Run>();
                 author = liveChatTextMessage.authorName?.simpleText ?? "";
-                string authorPhoto = liveChatTextMessage.authorPhoto?.thumbnails?.LastOrDefault()?.url ?? "";
+                string authorPhoto = GetOriginalImage(liveChatTextMessage.authorPhoto?.thumbnails?.LastOrDefault()?.url);
 
                 eb.WithDescription(string.Join("", runs.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))))
                   .WithAuthor(new EmbedAuthorBuilder().WithName(author)
@@ -151,10 +152,11 @@ namespace YoutubeLiveChatToDiscord
                 // Timestamp
                 long timeStamp = long.TryParse(liveChatTextMessage.timestampUsec, out long l) ? l / 1000 : 0;
                 EmbedFooterBuilder ft = new();
+                string authorBadgeUrl = GetOriginalImage(liveChatTextMessage.authorBadges?.FirstOrDefault()?.liveChatAuthorBadgeRenderer?.customThumbnail?.thumbnails?.LastOrDefault()?.url);
                 ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
                                           .LocalDateTime
                                           .ToString("yyyy/MM/dd HH:mm:ss"))
-                  .WithIconUrl(liveChatTextMessage.authorBadges?.FirstOrDefault()?.liveChatAuthorBadgeRenderer?.customThumbnail?.thumbnails?.LastOrDefault()?.url ?? "");
+                  .WithIconUrl(authorBadgeUrl);
 
                 // From Stream Owner
                 if (liveChatTextMessage.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
@@ -171,7 +173,7 @@ namespace YoutubeLiveChatToDiscord
                 List<Run> runs = liveChatPaidMessage.message?.runs ?? new List<Run>();
 
                 author = liveChatPaidMessage.authorName?.simpleText ?? "";
-                string authorPhoto = liveChatPaidMessage.authorPhoto?.thumbnails?.LastOrDefault()?.url ?? "";
+                string authorPhoto = GetOriginalImage(liveChatPaidMessage.authorPhoto?.thumbnails?.LastOrDefault()?.url);
 
                 eb.WithDescription(string.Join("", runs.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))))
                   .WithAuthor(new EmbedAuthorBuilder().WithName(author)
@@ -191,7 +193,7 @@ namespace YoutubeLiveChatToDiscord
                 ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
                                           .LocalDateTime
                                           .ToString("yyyy/MM/dd HH:mm:ss"))
-                  .WithIconUrl("https://upload.cc/i1/2022/01/28/uL9JV0.png");
+                  .WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/wallet.png");
 
                 // From Stream Owner
                 if (liveChatPaidMessage.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
@@ -206,7 +208,7 @@ namespace YoutubeLiveChatToDiscord
             // Super Chat Sticker
             {
                 author = liveChatPaidSticker.authorName?.simpleText ?? "";
-                string authorPhoto = liveChatPaidSticker.authorPhoto?.thumbnails?.LastOrDefault()?.url ?? "";
+                string authorPhoto = GetOriginalImage(liveChatPaidSticker.authorPhoto?.thumbnails?.LastOrDefault()?.url);
 
                 eb.WithDescription("")
                   .WithAuthor(new EmbedAuthorBuilder().WithName(author)
@@ -221,8 +223,8 @@ namespace YoutubeLiveChatToDiscord
                 eb.WithColor(bgColor);
 
                 // Super Chat Sticker Picture
-                string? stickerThumbUrl = liveChatPaidSticker.sticker?.thumbnails?.LastOrDefault()?.url;
-                eb.WithThumbnailUrl("https:" + stickerThumbUrl);
+                string stickerThumbUrl = GetOriginalImage("https:" + liveChatPaidSticker.sticker?.thumbnails?.LastOrDefault()?.url);
+                eb.WithThumbnailUrl(stickerThumbUrl);
 
                 // Timestamp
                 long timeStamp = long.TryParse(liveChatPaidSticker.timestampUsec, out long l) ? l / 1000 : 0;
@@ -273,6 +275,47 @@ namespace YoutubeLiveChatToDiscord
                 await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
             }
             catch (TimeoutException) { }
+        }
+
+        /// <summary>
+        /// 處理Youtube的圖片url，取得原始尺寸圖片
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        private static string GetOriginalImage(string? url)
+        {
+            if (string.IsNullOrEmpty(url))
+            {
+                return "";
+            }
+
+            string pattern1 = @"^(https?:\/\/lh\d+\.googleusercontent\.com\/.+\/)([^\/]+)(\/[^\/]+(\.(jpg|jpeg|gif|png|bmp|webp))?)(?:\?.+)?$";
+            if (Regex.IsMatch(url,pattern1))
+            {
+                GroupCollection matches = Regex.Matches(url,pattern1)[0].Groups;
+
+                return $"{matches[1]}s0{matches[3]}";
+            }
+
+            string pattern2 =@"^(https?:\/\/lh\d+\.googleusercontent\.com\/.+=)(.+)(?:\?.+)?$";
+            if (Regex.IsMatch(url, pattern2))
+            {
+                return $"{Regex.Matches(url, pattern2)[0].Groups[1]}s0";
+            }
+
+            string pattern3 =@"^(https?:\/\/\w+\.ggpht\.com\/.+\/)([^\/]+)(\/[^\/]+(\.(jpg|jpeg|gif|png|bmp|webp))?)(?:\?.+)?$";
+            if (Regex.IsMatch(url, pattern3))
+            {
+                return $"{Regex.Matches(url, pattern3)[0].Groups[1]}s0";
+            }
+
+            string pattern4 =@"^(https?:\/\/\w+\.ggpht\.com\/.+)=(?:[s|w|h])(\d+)(.+)?$";
+            if (Regex.IsMatch(url, pattern4))
+            {
+                return $"{Regex.Matches(url, pattern4)[0].Groups[1]}=s0";
+            }
+
+            return url;
         }
 
         private Task Client_Log(LogMessage arg)
