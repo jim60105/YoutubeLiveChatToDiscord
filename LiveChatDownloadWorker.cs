@@ -20,7 +20,7 @@ public class LiveChatDownloadWorker : BackgroundService
         logger.LogDebug("Found yt-dlp at {path}", YtdlPath);
     }
 
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         OptionSet live_chatOptionSet = new()
         {
@@ -47,15 +47,21 @@ public class LiveChatDownloadWorker : BackgroundService
         ytdlProc.OutputReceived += (o, e) => logger.LogTrace("{message}", e.Data);
         ytdlProc.ErrorReceived += (o, e) => logger.LogError("{error}", e.Data);
 
-        string url = $"https://www.youtube.com/watch?v={id}";
+        while (true)
+        {
+            string url = $"https://www.youtube.com/watch?v={id}";
+            logger.LogInformation("Start yt-dlp with url: {url}", url);
+            _ = await ytdlProc.RunAsync(new string[] { url },
+                                        info_jsonOptionSet,
+                                        stoppingToken)
+                              .ContinueWith((e) => ytdlProc.RunAsync(new string[] { url },
+                                                                     live_chatOptionSet,
+                                                                     stoppingToken))
+                              .Unwrap();
 
-        logger.LogInformation("Start yt-dlp with url: {url}", url);
-        return ytdlProc.RunAsync(new string[] { url },
-                                 info_jsonOptionSet,
-                                 stoppingToken)
-                       .ContinueWith((e) => ytdlProc.RunAsync(new string[] { url },
-                                                              live_chatOptionSet,
-                                                              stoppingToken));
+            logger.LogInformation("yt-dlp is stopped. Wait 20 sec and Start it again.");
+            await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
+        }
     }
 
     /// <summary>
