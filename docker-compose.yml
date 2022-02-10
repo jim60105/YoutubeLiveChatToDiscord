@@ -7,3 +7,17 @@ services:
     restart: unless-stopped
     # Youtube videoId, discord webhook url
     command: ["", ""]
+
+  # # Restart main container every 4 hours.
+  # jobber:
+  #   image: blacklabelops/jobber:docker
+  #   restart: always
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - ./:/youtubelivechattodiscord:ro
+  #   environment:
+  #     - JOB_NAME1=restart
+  #     - JOB_COMMAND1=cd /youtubelivechattodiscord && docker-compose restart youtubelivechattodiscord
+  #     - JOB_TIME1=* * */4 * * * #Every 4 hours
+  #     - JOB_NOTIFY_ERR1=false
+  #     - JOB_NOTIFY_FAIL1=false
