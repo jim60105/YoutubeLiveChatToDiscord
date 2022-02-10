@@ -1,9 +1,13 @@
 version: '3.7'
 
+x-labels:
+  labels: &default-label
+    youtubelivechattodiscord:
 services:
   youtubelivechattodiscord:
     image: ghcr.io/jim60105/youtubelivechattodiscord
     # build: .
+    labels: *default-label
     restart: unless-stopped
     # Youtube videoId, discord webhook url
     command: ["", ""]
@@ -14,10 +18,9 @@ services:
   #   restart: always
   #   volumes:
   #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #     - ./:/youtubelivechattodiscord:ro
   #   environment:
   #     - JOB_NAME1=restart
-  #     - JOB_COMMAND1=cd /youtubelivechattodiscord && docker-compose restart youtubelivechattodiscord
+  #     - JOB_COMMAND1=docker restart $$(docker ps -aqf "label=youtubelivechattodiscord")
   #     - JOB_TIME1=* * */4 * * * #Every 4 hours
   #     - JOB_NOTIFY_ERR1=false
   #     - JOB_NOTIFY_FAIL1=false
