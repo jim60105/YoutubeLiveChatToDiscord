@@ -10,11 +10,12 @@
 
 - 不適合用在有大量留言的狀況，此工具是設計來監控 FreeChat\
     此工具最高每兩秒打一次 discord webhook ，可能造成轉送速度跟不上留言速度
-    > Discord 方面的限制為，同一頻道中每分鐘可呼叫 Webhook 30次 [ref](https://twitter.com/lolpython/status/967621046277820416)
+    > Discord 方面的限制為，同一頻道中每分鐘可呼叫 Webhook 30次 [ref](https://twitter.com/lolpython/status/967621046277820416)\
+    > 若同時啟動複數此工具並推送至同一個頻道，很容易觸發Discord冷卻，請留意你的使用環境
 - 底層使用 yt-dlp 來抓資料，並不是 youtube api ，沒有額度問題
 - 此工具在閒置時，讀取 yt-dlp 寫的 json 檔案間隔為10秒
-- 啟動時會等待20秒，使 yt-dlp 下載舊留言，再由此開始監控
-    > 如果要跳過此20秒，請傳入環境變數`SKIP_STARTUP_WAITING`
+- 啟動時會等待1分鐘，使 yt-dlp 下載舊留言，再由此開始監控
+    > 如果要跳過此1分鐘，請傳入環境變數`SKIP_STARTUP_WAITING`
 
 ## Docker
 
