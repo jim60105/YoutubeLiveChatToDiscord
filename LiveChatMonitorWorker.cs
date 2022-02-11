@@ -28,43 +28,64 @@ namespace YoutubeLiveChatToDiscord
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!liveChatFileInfo.Exists && !stoppingToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested)
             {
-                logger.LogInformation("{jsonFile} not found.", liveChatFileInfo.FullName);
-                logger.LogInformation($"Wait for {nameof(LiveChatDownloadWorker)} to start.");
+                try
+                {
+                    while (!liveChatFileInfo.Exists && !stoppingToken.IsCancellationRequested)
+                    {
+                        logger.LogInformation("Chat json file not found. {jsonFile}", liveChatFileInfo.FullName);
+                        logger.LogInformation($"Wait for {nameof(LiveChatDownloadWorker)} to start.");
+                        await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                        liveChatFileInfo.Refresh();
+                    }
+                    await Monitoring(stoppingToken);
+                }
+                catch (FileNotFoundException)
+                {
+                    logger.LogWarning("Chat json file not found. {jsonFile}", liveChatFileInfo.FullName);
+                    logger.LogWarning("Wait 10 seconds and try again.");
+                }
                 await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
                 liveChatFileInfo.Refresh();
             }
+        }
 
+        private async Task Monitoring(CancellationToken stoppingToken)
+        {
             await GetVideoInfo(stoppingToken);
-
-            using StreamReader sr = new(liveChatFileInfo.OpenRead());
 
 #if !DEBUG
             if (null == Environment.GetEnvironmentVariable("SKIP_STARTUP_WAITING"))
             {
-                logger.LogInformation("Wait 20 sec to skip old chats");
+                logger.LogInformation("Wait 20 seconds to skip old chats");
                 await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
             }
 #endif
-            position = sr.BaseStream.Length;
 
+            position = liveChatFileInfo.Length;
             logger.LogDebug("Start at position: {position}", position);
             logger.LogInformation("Start Monitoring!");
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (sr.BaseStream.Length <= position)
+                using StreamReader sr = new(liveChatFileInfo.OpenRead());
+
+                if (sr.BaseStream.Length > position)
+                {
+                    await ProcessChats(sr, stoppingToken);
+                }
+                else
                 {
                     position = sr.BaseStream.Length;
-                    logger.LogTrace("No new chat. Wait 10 sec");
+                    sr.Dispose();
+                    logger.LogTrace("No new chat. Wait 10 seconds.");
                     // 每10秒檢查一次json檔
                     await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-                    continue;
                 }
-
-                await ProcessChats(sr, stoppingToken);
             }
+
+            return;
         }
 
         private async Task GetVideoInfo(CancellationToken stoppingToken)
@@ -72,7 +93,8 @@ namespace YoutubeLiveChatToDiscord
             FileInfo videoInfo = new($"{id}.info.json");
             while (!videoInfo.Exists && !stoppingToken.IsCancellationRequested)
             {
-                logger.LogInformation("{jsonFile} not found.", videoInfo.FullName);
+                // Chat json file 在 VideoInfo json file之後被產生，理論上這段不會進來
+                logger.LogInformation("VideoInfo json file not found. {jsonFile}", videoInfo.FullName);
                 logger.LogInformation($"Wait for {nameof(LiveChatDownloadWorker)} to start.");
                 await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
                 videoInfo.Refresh();
@@ -292,26 +314,26 @@ namespace YoutubeLiveChatToDiscord
             }
 
             string pattern1 = @"^(https?:\/\/lh\d+\.googleusercontent\.com\/.+\/)([^\/]+)(\/[^\/]+(\.(jpg|jpeg|gif|png|bmp|webp))?)(?:\?.+)?$";
-            if (Regex.IsMatch(url,pattern1))
+            if (Regex.IsMatch(url, pattern1))
             {
-                GroupCollection matches = Regex.Matches(url,pattern1)[0].Groups;
+                GroupCollection matches = Regex.Matches(url, pattern1)[0].Groups;
 
                 return $"{matches[1]}s0{matches[3]}";
             }
 
-            string pattern2 =@"^(https?:\/\/lh\d+\.googleusercontent\.com\/.+=)(.+)(?:\?.+)?$";
+            string pattern2 = @"^(https?:\/\/lh\d+\.googleusercontent\.com\/.+=)(.+)(?:\?.+)?$";
             if (Regex.IsMatch(url, pattern2))
             {
                 return $"{Regex.Matches(url, pattern2)[0].Groups[1]}s0";
             }
 
-            string pattern3 =@"^(https?:\/\/\w+\.ggpht\.com\/.+\/)([^\/]+)(\/[^\/]+(\.(jpg|jpeg|gif|png|bmp|webp))?)(?:\?.+)?$";
+            string pattern3 = @"^(https?:\/\/\w+\.ggpht\.com\/.+\/)([^\/]+)(\/[^\/]+(\.(jpg|jpeg|gif|png|bmp|webp))?)(?:\?.+)?$";
             if (Regex.IsMatch(url, pattern3))
             {
                 return $"{Regex.Matches(url, pattern3)[0].Groups[1]}s0";
             }
 
-            string pattern4 =@"^(https?:\/\/\w+\.ggpht\.com\/.+)=(?:[s|w|h])(\d+)(.+)?$";
+            string pattern4 = @"^(https?:\/\/\w+\.ggpht\.com\/.+)=(?:[s|w|h])(\d+)(.+)?$";
             if (Regex.IsMatch(url, pattern4))
             {
                 return $"{Regex.Matches(url, pattern4)[0].Groups[1]}=s0";
