@@ -50,20 +50,30 @@ public class LiveChatDownloadWorker : BackgroundService
         ytdlProc.OutputReceived += (o, e) => logger.LogTrace("{message}", e.Data);
         ytdlProc.ErrorReceived += (o, e) => logger.LogError("{error}", e.Data);
 
-        while (true)
+        try
         {
-            string url = $"https://www.youtube.com/watch?v={id}";
-            logger.LogInformation("Start yt-dlp with url: {url}", url);
-            _ = await ytdlProc.RunAsync(new string[] { url },
-                                        info_jsonOptionSet,
-                                        stoppingToken)
-                              .ContinueWith((e) => ytdlProc.RunAsync(new string[] { url },
-                                                                     live_chatOptionSet,
-                                                                     stoppingToken))
-                              .Unwrap();
+            while (true)
+            {
+                string url = $"https://www.youtube.com/watch?v={id}";
+                logger.LogInformation("Start yt-dlp with url: {url}", url);
+                _ = await ytdlProc.RunAsync(new string[] { url },
+                                            info_jsonOptionSet,
+                                            stoppingToken)
+                                  .ContinueWith((e) => ytdlProc.RunAsync(new string[] { url },
+                                                                         live_chatOptionSet,
+                                                                         stoppingToken))
+                                  .Unwrap();
 
-            logger.LogInformation("yt-dlp is stopped. Wait 20 seconds and start it again.");
-            await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
+                logger.LogInformation("yt-dlp is stopped. Wait 20 seconds and start it again.");
+                await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            logger.LogCritical("yt-dlp is stop with error! Wait 10 seconds before closing the program. This is to prevent a restart loop from hanging the machine.");
+#pragma warning disable CA2016 // 將 'CancellationToken' 參數轉送給方法
+            await Task.Delay(TimeSpan.FromSeconds(10));
+#pragma warning restore CA2016 // 將 'CancellationToken' 參數轉送給方法
         }
     }
 
