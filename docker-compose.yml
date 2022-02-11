@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 x-labels:
   labels: &default-label
@@ -8,19 +8,20 @@ services:
     image: ghcr.io/jim60105/youtubelivechattodiscord
     # build: .
     labels: *default-label
-    restart: unless-stopped
+    restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
+    # volumes: ["./appsettings.json:/app/appsettings.json"]
     # Youtube videoId, discord webhook url
     command: ["", ""]
 
-  # # Restart main container every 4 hours.
-  # jobber:
-  #   image: blacklabelops/jobber:docker
-  #   restart: always
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #   environment:
-  #     - JOB_NAME1=restart
-  #     - JOB_COMMAND1=docker restart $$(docker ps -aqf "label=youtubelivechattodiscord")
-  #     - JOB_TIME1=* * */4 * * * #Every 4 hours
-  #     - JOB_NOTIFY_ERR1=false
-  #     - JOB_NOTIFY_FAIL1=false
+  # Restart main container every hour.
+  jobber:
+    image: blacklabelops/jobber:docker
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - JOB_NAME1=start
+      - JOB_COMMAND1=docker start $$(docker ps -aqf "label=youtubelivechattodiscord")
+      - JOB_TIME1=0 0 * * * * #Every hour
+      - JOB_NOTIFY_ERR1=false
+      - JOB_NOTIFY_FAIL1=false

@@ -1,5 +1,5 @@
 # Override logging settings to LogServer
-version: '3.7'
+version: "3.7"
 
 x-logging:
   &default-logging
