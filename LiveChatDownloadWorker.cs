@@ -7,7 +7,6 @@ public class LiveChatDownloadWorker : BackgroundService
 {
     private readonly ILogger<LiveChatDownloadWorker> logger;
     private readonly string id;
-    private readonly string YtdlPath;
 
     public LiveChatDownloadWorker(ILogger<LiveChatDownloadWorker> _logger)
     {
@@ -16,8 +15,12 @@ public class LiveChatDownloadWorker : BackgroundService
         id = Environment.GetEnvironmentVariable("VIDEO_ID") ?? "";
         if (string.IsNullOrEmpty(id)) throw new ArgumentException(nameof(id));
 
-        YtdlPath = WhereIsYt_dlp();
-        logger.LogDebug("Found yt-dlp at {path}", YtdlPath);
+        // 更新ytdlp
+        logger.LogInformation("Start updating yt-dlp.");
+        new YoutubeDL()
+        {
+            YoutubeDLPath = WhereIsYt_dlp()
+        }.RunUpdate().Wait();
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -43,7 +46,7 @@ public class LiveChatDownloadWorker : BackgroundService
         };
         info_jsonOptionSet.AddCustomOption("--ignore-no-formats-error", true);
 
-        YoutubeDLProcess ytdlProc = new(YtdlPath);
+        YoutubeDLProcess ytdlProc = new(WhereIsYt_dlp());
         ytdlProc.OutputReceived += (o, e) => logger.LogTrace("{message}", e.Data);
         ytdlProc.ErrorReceived += (o, e) => logger.LogError("{error}", e.Data);
 
@@ -59,7 +62,7 @@ public class LiveChatDownloadWorker : BackgroundService
                                                                      stoppingToken))
                               .Unwrap();
 
-            logger.LogInformation("yt-dlp is stopped. Wait 20 sec and Start it again.");
+            logger.LogInformation("yt-dlp is stopped. Wait 20 seconds and start it again.");
             await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
         }
     }
@@ -68,16 +71,18 @@ public class LiveChatDownloadWorker : BackgroundService
     /// 尋找yt-dlp程式路徑
     /// </summary>
     /// <returns>Full path of yt-dlp</returns>
-    public static string WhereIsYt_dlp()
+    public string WhereIsYt_dlp()
     {
         // https://stackoverflow.com/a/63021455
         string file = "yt-dlp";
         string[] paths = Environment.GetEnvironmentVariable("PATH")?.Split(';') ?? Array.Empty<string>();
         string[] extensions = Environment.GetEnvironmentVariable("PATHEXT")?.Split(';') ?? Array.Empty<string>();
-        return (from p in new[] { Environment.CurrentDirectory }.Concat(paths)
-                from e in extensions
-                let path = Path.Combine(p.Trim(), file + e.ToLower())
-                where File.Exists(path)
-                select path)?.FirstOrDefault() ?? "/usr/bin/yt-dlp";
+        string YtdlPath = (from p in new[] { Environment.CurrentDirectory }.Concat(paths)
+                           from e in extensions
+                           let path = Path.Combine(p.Trim(), file + e.ToLower())
+                           where File.Exists(path)
+                           select path)?.FirstOrDefault() ?? "/usr/bin/yt-dlp";
+        logger.LogDebug("Found yt-dlp at {path}", YtdlPath);
+        return YtdlPath;
     }
 }
