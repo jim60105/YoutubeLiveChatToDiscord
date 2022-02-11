@@ -1,7 +1,6 @@
 using Discord;
 using Discord.Webhook;
 using Newtonsoft.Json;
-using System.Text.RegularExpressions;
 using YoutubeLiveChatToDiscord.Models;
 
 namespace YoutubeLiveChatToDiscord
@@ -18,7 +17,7 @@ namespace YoutubeLiveChatToDiscord
                                      DiscordWebhookClient _client)
         {
             (logger, client) = (_logger, _client);
-            client.Log += Client_Log;
+            client.Log += Helper.DiscordWebhookClient_Log;
 
             id = Environment.GetEnvironmentVariable("VIDEO_ID") ?? "";
             if (string.IsNullOrEmpty(id)) throw new ArgumentException(nameof(id));
@@ -70,6 +69,7 @@ namespace YoutubeLiveChatToDiscord
 
             while (!stoppingToken.IsCancellationRequested)
             {
+                liveChatFileInfo.Refresh();
                 if (liveChatFileInfo.Length > position)
                 {
                     await ProcessChats(stoppingToken);
@@ -80,7 +80,6 @@ namespace YoutubeLiveChatToDiscord
                     logger.LogTrace("No new chat. Wait 10 seconds.");
                     // 每10秒檢查一次json檔
                     await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-                    liveChatFileInfo.Refresh();
                 }
             }
 
@@ -119,10 +118,10 @@ namespace YoutubeLiveChatToDiscord
                 try
                 {
                     str = await sr.ReadLineAsync() ?? "";
+                    position = sr.BaseStream.Position;
                     if (string.IsNullOrEmpty(str)) continue;
 
                     Chat? chat = JsonConvert.DeserializeObject<Chat>(str);
-                    position = sr.BaseStream.Position;
                     if (null == chat) continue;
 
                     await BuildRequestAndSendToDiscord(chat, stoppingToken);
@@ -131,7 +130,6 @@ namespace YoutubeLiveChatToDiscord
                 {
                     logger.LogError("{error}", e.Message);
                     logger.LogError("{originalString}", str);
-                    position = sr.BaseStream.Position;
                 }
                 catch (ArgumentException e)
                 {
@@ -153,7 +151,7 @@ namespace YoutubeLiveChatToDiscord
             EmbedBuilder eb = new();
             eb.WithTitle(Environment.GetEnvironmentVariable("TITLE") ?? "")
               .WithUrl($"https://youtu.be/{id}")
-              .WithThumbnailUrl(GetOriginalImage(Environment.GetEnvironmentVariable("VIDEO_THUMB")));
+              .WithThumbnailUrl(Helper.GetOriginalImage(Environment.GetEnvironmentVariable("VIDEO_THUMB")));
             string author = "";
 
             LiveChatTextMessageRenderer? liveChatTextMessage = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatTextMessageRenderer;
@@ -165,7 +163,7 @@ namespace YoutubeLiveChatToDiscord
             {
                 List<Run> runs = liveChatTextMessage.message?.runs ?? new List<Run>();
                 author = liveChatTextMessage.authorName?.simpleText ?? "";
-                string authorPhoto = GetOriginalImage(liveChatTextMessage.authorPhoto?.thumbnails?.LastOrDefault()?.url);
+                string authorPhoto = Helper.GetOriginalImage(liveChatTextMessage.authorPhoto?.thumbnails?.LastOrDefault()?.url);
 
                 eb.WithDescription(string.Join("", runs.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))))
                   .WithAuthor(new EmbedAuthorBuilder().WithName(author)
@@ -175,7 +173,7 @@ namespace YoutubeLiveChatToDiscord
                 // Timestamp
                 long timeStamp = long.TryParse(liveChatTextMessage.timestampUsec, out long l) ? l / 1000 : 0;
                 EmbedFooterBuilder ft = new();
-                string authorBadgeUrl = GetOriginalImage(liveChatTextMessage.authorBadges?.FirstOrDefault()?.liveChatAuthorBadgeRenderer?.customThumbnail?.thumbnails?.LastOrDefault()?.url);
+                string authorBadgeUrl = Helper.GetOriginalImage(liveChatTextMessage.authorBadges?.FirstOrDefault()?.liveChatAuthorBadgeRenderer?.customThumbnail?.thumbnails?.LastOrDefault()?.url);
                 ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
                                           .LocalDateTime
                                           .ToString("yyyy/MM/dd HH:mm:ss"))
@@ -196,7 +194,7 @@ namespace YoutubeLiveChatToDiscord
                 List<Run> runs = liveChatPaidMessage.message?.runs ?? new List<Run>();
 
                 author = liveChatPaidMessage.authorName?.simpleText ?? "";
-                string authorPhoto = GetOriginalImage(liveChatPaidMessage.authorPhoto?.thumbnails?.LastOrDefault()?.url);
+                string authorPhoto = Helper.GetOriginalImage(liveChatPaidMessage.authorPhoto?.thumbnails?.LastOrDefault()?.url);
 
                 eb.WithDescription(string.Join("", runs.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))))
                   .WithAuthor(new EmbedAuthorBuilder().WithName(author)
@@ -231,7 +229,7 @@ namespace YoutubeLiveChatToDiscord
             // Super Chat Sticker
             {
                 author = liveChatPaidSticker.authorName?.simpleText ?? "";
-                string authorPhoto = GetOriginalImage(liveChatPaidSticker.authorPhoto?.thumbnails?.LastOrDefault()?.url);
+                string authorPhoto = Helper.GetOriginalImage(liveChatPaidSticker.authorPhoto?.thumbnails?.LastOrDefault()?.url);
 
                 eb.WithDescription("")
                   .WithAuthor(new EmbedAuthorBuilder().WithName(author)
@@ -246,7 +244,7 @@ namespace YoutubeLiveChatToDiscord
                 eb.WithColor(bgColor);
 
                 // Super Chat Sticker Picture
-                string stickerThumbUrl = GetOriginalImage("https:" + liveChatPaidSticker.sticker?.thumbnails?.LastOrDefault()?.url);
+                string stickerThumbUrl = Helper.GetOriginalImage("https:" + liveChatPaidSticker.sticker?.thumbnails?.LastOrDefault()?.url);
                 eb.WithThumbnailUrl(stickerThumbUrl);
 
                 // Timestamp
@@ -288,6 +286,11 @@ namespace YoutubeLiveChatToDiscord
                 throw new ArgumentException("Message type not supported", nameof(chat));
             }
 
+            if (!stoppingToken.IsCancellationRequested)
+            {
+                return;
+            }
+
             try
             {
                 logger.LogDebug("Sending Request to Discord: {author}: {message}", author, eb.Description);
@@ -301,77 +304,5 @@ namespace YoutubeLiveChatToDiscord
             }
             catch (TimeoutException) { }
         }
-
-        /// <summary>
-        /// 處理Youtube的圖片url，取得原始尺寸圖片
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        private static string GetOriginalImage(string? url)
-        {
-            if (string.IsNullOrEmpty(url))
-            {
-                return "";
-            }
-
-            string pattern1 = @"^(https?:\/\/lh\d+\.googleusercontent\.com\/.+\/)([^\/]+)(\/[^\/]+(\.(jpg|jpeg|gif|png|bmp|webp))?)(?:\?.+)?$";
-            if (Regex.IsMatch(url, pattern1))
-            {
-                GroupCollection matches = Regex.Matches(url, pattern1)[0].Groups;
-
-                return $"{matches[1]}s0{matches[3]}";
-            }
-
-            string pattern2 = @"^(https?:\/\/lh\d+\.googleusercontent\.com\/.+=)(.+)(?:\?.+)?$";
-            if (Regex.IsMatch(url, pattern2))
-            {
-                return $"{Regex.Matches(url, pattern2)[0].Groups[1]}s0";
-            }
-
-            string pattern3 = @"^(https?:\/\/\w+\.ggpht\.com\/.+\/)([^\/]+)(\/[^\/]+(\.(jpg|jpeg|gif|png|bmp|webp))?)(?:\?.+)?$";
-            if (Regex.IsMatch(url, pattern3))
-            {
-                return $"{Regex.Matches(url, pattern3)[0].Groups[1]}s0";
-            }
-
-            string pattern4 = @"^(https?:\/\/\w+\.ggpht\.com\/.+)=(?:[s|w|h])(\d+)(.+)?$";
-            if (Regex.IsMatch(url, pattern4))
-            {
-                return $"{Regex.Matches(url, pattern4)[0].Groups[1]}=s0";
-            }
-
-            return url;
-        }
-
-        private Task Client_Log(LogMessage arg)
-        {
-            return Task.Run(() =>
-            {
-                switch (arg.Severity)
-                {
-                    case LogSeverity.Critical:
-                        logger.LogCritical("{message}", arg);
-                        break;
-                    case LogSeverity.Error:
-                        logger.LogError("{message}", arg);
-                        break;
-                    case LogSeverity.Warning:
-                        logger.LogWarning("{message}", arg);
-                        break;
-                    case LogSeverity.Info:
-                        logger.LogInformation("{message}", arg);
-                        break;
-                    case LogSeverity.Verbose:
-                        logger.LogTrace("{message}", arg);
-                        break;
-                    case LogSeverity.Debug:
-                        logger.LogDebug("{message}", arg);
-                        break;
-                    default:
-                        break;
-                }
-            });
-        }
-
     }
 }
