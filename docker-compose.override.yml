@@ -8,5 +8,16 @@ x-logging:
     gelf-address: "udp://127.0.0.1:12201"
 
 services:
-  youtubelivechattodiscord:
+  youtubelivechattodiscord_Tama:
     logging: *default-logging
+  youtubelivechattodiscord_Yuna:
+    logging: *default-logging
+  youtubelivechattodiscord_Kakeru:
+    logging: *default-logging
+  youtubelivechattodiscord_Emurii:
+    logging: *default-logging
+  youtubelivechattodiscord_Ruri:
+    logging: *default-logging
+  youtubelivechattodiscord_Aruma:
+    logging: *default-logging
+
