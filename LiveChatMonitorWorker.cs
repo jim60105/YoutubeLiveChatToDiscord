@@ -58,30 +58,29 @@ namespace YoutubeLiveChatToDiscord
 #if !DEBUG
             if (null == Environment.GetEnvironmentVariable("SKIP_STARTUP_WAITING"))
             {
-                logger.LogInformation("Wait 20 seconds to skip old chats");
-                await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
+                logger.LogInformation("Wait 1 miunute to skip old chats");
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                liveChatFileInfo.Refresh();
             }
 #endif
 
             position = liveChatFileInfo.Length;
-            logger.LogDebug("Start at position: {position}", position);
+            logger.LogInformation("Start at position: {position}", position);
             logger.LogInformation("Start Monitoring!");
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                using StreamReader sr = new(liveChatFileInfo.OpenRead());
-
-                if (sr.BaseStream.Length > position)
+                if (liveChatFileInfo.Length > position)
                 {
-                    await ProcessChats(sr, stoppingToken);
+                    await ProcessChats(stoppingToken);
                 }
                 else
                 {
-                    position = sr.BaseStream.Length;
-                    sr.Dispose();
+                    position = liveChatFileInfo.Length;
                     logger.LogTrace("No new chat. Wait 10 seconds.");
                     // 每10秒檢查一次json檔
                     await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                    liveChatFileInfo.Refresh();
                 }
             }
 
@@ -109,8 +108,10 @@ namespace YoutubeLiveChatToDiscord
             Environment.SetEnvironmentVariable("VIDEO_THUMB", thumb);
         }
 
-        private async Task ProcessChats(StreamReader sr, CancellationToken stoppingToken)
+        private async Task ProcessChats(CancellationToken stoppingToken)
         {
+            using StreamReader sr = new(liveChatFileInfo.OpenRead());
+
             sr.BaseStream.Seek(position, SeekOrigin.Begin);
             while (position < sr.BaseStream.Length)
             {
