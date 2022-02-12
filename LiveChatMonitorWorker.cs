@@ -276,20 +276,14 @@ namespace YoutubeLiveChatToDiscord
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatMembershipItemRenderer
                 // SC Ticker messages.
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addLiveChatTickerItemAction
-            )
-            {
-                return;
-            }
+            ) { return; }
             else
             {
                 logger.LogWarning("Message type not supported, skip sending to discord.");
                 throw new ArgumentException("Message type not supported", nameof(chat));
             }
 
-            if (!stoppingToken.IsCancellationRequested)
-            {
-                return;
-            }
+            if (stoppingToken.IsCancellationRequested) return;
 
             try
             {
