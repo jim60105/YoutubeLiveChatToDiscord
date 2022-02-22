@@ -46,6 +46,12 @@ public class LiveChatDownloadWorker : BackgroundService
         };
         info_jsonOptionSet.AddCustomOption("--ignore-no-formats-error", true);
 
+        if (File.Exists("cookies.txt"))
+        {
+            live_chatOptionSet.Cookies = "cookies.txt";
+            info_jsonOptionSet.Cookies = "cookies.txt";
+        }
+
         YoutubeDLProcess ytdlProc = new(Helper.WhereIsYt_dlp());
         ytdlProc.OutputReceived += (o, e) => logger.LogTrace("{message}", e.Data);
         ytdlProc.ErrorReceived += (o, e) => logger.LogError("{error}", e.Data);

@@ -9,7 +9,9 @@ services:
     # build: .
     labels: *default-label
     restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
-    # volumes: ["./appsettings.json:/app/appsettings.json"]
+    # volumes: 
+      # - ./appsettings.json:/app/appsettings.json
+      # - ./cookies.txt:/app/cookies.txt
     # Youtube videoId, discord webhook url
     command: ["", ""]
 
