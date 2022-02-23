@@ -16,8 +16,17 @@
 - 此工具在閒置時，讀取 yt-dlp 寫的 json 檔案間隔為10秒
 - 啟動時會等待1分鐘，使 yt-dlp 下載舊留言，再由此開始監控
     > 如果要跳過此1分鐘，請傳入環境變數`SKIP_STARTUP_WAITING`
+- 在程式同一層若存在名為`cookies.txt`的檔案，就會讀入yt-dlp，使能在會員限定直播間使用
+
+## 會員限定(需登入)的影片
+
+在程式的執行目錄若存在名為`cookies.txt`的檔案，就會將之讀入yt-dlp
+
+Docker請將`cookies.txt` mount 至 `/app/cookies.txt`
 
 ## Docker
+
+> 請參考`docker-compose.yml`
 
 需傳入兩個參數
 
