@@ -1,5 +1,6 @@
 using Discord.Webhook;
 using YoutubeLiveChatToDiscord;
+using YoutubeLiveChatToDiscord.Services;
 
 Environment.SetEnvironmentVariable("VIDEO_ID", Environment.GetCommandLineArgs()[1]);
 Environment.SetEnvironmentVariable("WEBHOOK", Environment.GetCommandLineArgs()[2]);
@@ -15,7 +16,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
         services.AddHostedService<LiveChatMonitorWorker>()
-                .AddHostedService<LiveChatDownloadWorker>()
+                .AddSingleton<LiveChatDownloadService>()
                 .AddSingleton<DiscordWebhookClient>((service) =>
                     new DiscordWebhookClient(Environment.GetEnvironmentVariable("WEBHOOK")));
     })
