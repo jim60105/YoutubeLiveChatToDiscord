@@ -2,7 +2,7 @@
 
 FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine AS base
 WORKDIR /app
-RUN apk add --no-cache --virtual build-deps musl-dev gcc &&\
+RUN apk add --no-cache --virtual build-deps musl-dev gcc g++ python3-dev &&\
     apk add --no-cache py3-pip tzdata &&\
     pip install --upgrade yt-dlp &&\
     apk del build-deps
