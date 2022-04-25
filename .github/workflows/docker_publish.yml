@@ -28,10 +28,11 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }},ghcr.io/${{ github.repository }}
-          flavor: |
-            latest=true
-            prefix=
-            suffix=
+          # set latest tag for default branch
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
 
       # Create a Access Token and save it as as Actions secret
       # https://hub.docker.com/settings/security
