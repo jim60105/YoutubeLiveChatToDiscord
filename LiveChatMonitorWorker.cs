@@ -109,7 +109,10 @@ namespace YoutubeLiveChatToDiscord
 
         private async Task ProcessChats(CancellationToken stoppingToken)
         {
-            using StreamReader sr = new(liveChatFileInfo.OpenRead());
+            // Reading a file used by another process
+            // https://stackoverflow.com/a/9760751
+            using FileStream fs = new FileStream(liveChatFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using StreamReader sr = new(fs);
 
             sr.BaseStream.Seek(position, SeekOrigin.Begin);
             while (position < sr.BaseStream.Length)
