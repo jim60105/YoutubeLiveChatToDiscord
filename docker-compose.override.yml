@@ -10,14 +10,22 @@ x-logging:
 services:
   youtubelivechattodiscord_Tama:
     logging: *default-logging
+  youtubelivechattodiscord_Tama_mem:
+    logging: *default-logging
   youtubelivechattodiscord_Yuna:
     logging: *default-logging
   youtubelivechattodiscord_Kakeru:
+    logging: *default-logging
+  youtubelivechattodiscord_Kakeru_mem:
     logging: *default-logging
   youtubelivechattodiscord_Emurii:
     logging: *default-logging
   youtubelivechattodiscord_Ruri:
     logging: *default-logging
   youtubelivechattodiscord_Aruma:
+    logging: *default-logging
+  youtubelivechattodiscord_Aruma_mem:
+    logging: *default-logging
+  youtubelivechattodiscord_Eri:
     logging: *default-logging
 

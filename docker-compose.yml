@@ -9,49 +9,65 @@ services:
     image: ghcr.io/jim60105/youtubelivechattodiscord
     labels: *default-label
     restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
-    volumes: 
-      - ./appsettings.json:/app/appsettings.json
-      - ./cookies.txt:/app/cookies.txt
+    # volumes: 
+    #   - ./appsettings.json:/app/appsettings.json
+    #   - ./cookies.txt:/app/cookies.txt
     command: ["jOLeAb0psxs", ""]
-  youtubelivechattodiscord_Yuna:
+  youtubelivechattodiscord_Tama_mem:
     image: ghcr.io/jim60105/youtubelivechattodiscord
     labels: *default-label
     restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
     volumes: 
-      - ./appsettings.json:/app/appsettings.json
+      # - ./appsettings.json:/app/appsettings.json
       - ./cookies.txt:/app/cookies.txt
+    command: ["cEo2K3x6KtU", ""]
+  youtubelivechattodiscord_Yuna:
+    image: ghcr.io/jim60105/youtubelivechattodiscord
+    labels: *default-label
+    restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
+    # volumes: 
+    #   - ./appsettings.json:/app/appsettings.json
+    #   - ./cookies.txt:/app/cookies.txt
     command: ["-L5TLbSefMg", ""]
   youtubelivechattodiscord_Kakeru:
     image: ghcr.io/jim60105/youtubelivechattodiscord
     labels: *default-label
     restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
-    volumes: 
-      - ./appsettings.json:/app/appsettings.json
-      - ./cookies.txt:/app/cookies.txt
+    # volumes: 
+    #   - ./appsettings.json:/app/appsettings.json
+    #   - ./cookies.txt:/app/cookies.txt
     command: ["NPWxfqm6R2Y", ""]
-  youtubelivechattodiscord_Emurii:
+  youtubelivechattodiscord_Kakeru_mem:
     image: ghcr.io/jim60105/youtubelivechattodiscord
     labels: *default-label
     restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
     volumes: 
-      - ./appsettings.json:/app/appsettings.json
+      # - ./appsettings.json:/app/appsettings.json
       - ./cookies.txt:/app/cookies.txt
+    command: ["dfqLSJpTyw4", ""]
+  youtubelivechattodiscord_Emurii:
+    image: ghcr.io/jim60105/youtubelivechattodiscord
+    labels: *default-label
+    restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
+    # volumes: 
+    #   - ./appsettings.json:/app/appsettings.json
+    #   - ./cookies.txt:/app/cookies.txt
     command: ["oAXnK1brF2s", ""]
   youtubelivechattodiscord_Ruri:
     image: ghcr.io/jim60105/youtubelivechattodiscord
     labels: *default-label
     restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
-    volumes: 
-      - ./appsettings.json:/app/appsettings.json
-      - ./cookies.txt:/app/cookies.txt
+    # volumes: 
+    #   - ./appsettings.json:/app/appsettings.json
+    #   - ./cookies.txt:/app/cookies.txt
     command: ["-Cynj3RSxFA", ""]
   youtubelivechattodiscord_Aruma:
     image: ghcr.io/jim60105/youtubelivechattodiscord
     labels: *default-label
     restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
-    volumes: 
-      - ./appsettings.json:/app/appsettings.json
-      - ./cookies.txt:/app/cookies.txt
+    # volumes: 
+    #   - ./appsettings.json:/app/appsettings.json
+    #   - ./cookies.txt:/app/cookies.txt
     # Youtube videoId, discord webhook url
     command: ["b8mhr2fwolA", ""]
   youtubelivechattodiscord_Aruma_mem:
@@ -59,10 +75,19 @@ services:
     labels: *default-label
     restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
     volumes: 
-      - ./appsettings.json:/app/appsettings.json
+      # - ./appsettings.json:/app/appsettings.json
       - ./cookies.txt:/app/cookies.txt
     # Youtube videoId, discord webhook url
     command: ["qhKnx6rEoUs", ""]
+  youtubelivechattodiscord_Eri:
+    image: ghcr.io/jim60105/youtubelivechattodiscord
+    labels: *default-label
+    restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
+    # volumes: 
+    #   - ./appsettings.json:/app/appsettings.json
+    #   - ./cookies.txt:/app/cookies.txt
+    # Youtube videoId, discord webhook url
+    command: ["rhXNPqjPQw4", ""]
 
   # Restart main container every hour.
   jobber:
