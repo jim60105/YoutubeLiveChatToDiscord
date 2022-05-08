@@ -330,18 +330,33 @@ namespace YoutubeLiveChatToDiscord
 
             if (stoppingToken.IsCancellationRequested) return;
 
+            logger.LogDebug("Sending Request to Discord: {author}: {message}", author, eb.Description);
+
             try
             {
-                logger.LogDebug("Sending Request to Discord: {author}: {message}", author, eb.Description);
-                ulong messageId = await client.SendMessageAsync(embeds: new Embed[] { eb.Build() });
-                logger.LogDebug("Message sent to discord, message id: {messageId}", messageId);
-
-                // The rate for Discord webhooks are 30 requests/minute per channel.
-                // Be careful when you run multiple instances in the same channel!
-                logger.LogTrace("Wait 2 seconds for discord webhook rate limit");
-                await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+                await SendMessage();
             }
             catch (TimeoutException) { }
+            // System.Net.Http.HttpRequestException: Resource temporarily unavailable (discord.com:443)
+            catch (HttpRequestException)
+            {
+                // Retry once after 5 sec
+                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                await SendMessage();
+            }
+
+            // The rate for Discord webhooks are 30 requests/minute per channel.
+            // Be careful when you run multiple instances in the same channel!
+            logger.LogTrace("Wait 2 seconds for discord webhook rate limit");
+            await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
+
+            Task SendMessage()
+               => client.SendMessageAsync(embeds: new Embed[] { eb.Build() })
+                   .ContinueWith(async p =>
+                   {
+                       ulong messageId = await p;
+                       logger.LogDebug("Message sent to discord, message id: {messageId}", messageId);
+                   }, stoppingToken);
         }
     }
 }
