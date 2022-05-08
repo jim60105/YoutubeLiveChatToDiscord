@@ -111,7 +111,7 @@ namespace YoutubeLiveChatToDiscord
         {
             // Reading a file used by another process
             // https://stackoverflow.com/a/9760751
-            using FileStream fs = new FileStream(liveChatFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using FileStream fs = new(liveChatFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using StreamReader sr = new(fs);
 
             sr.BaseStream.Seek(position, SeekOrigin.Begin);
@@ -120,7 +120,7 @@ namespace YoutubeLiveChatToDiscord
                 string? str = "";
                 try
                 {
-                    str = await sr.ReadLineAsync() ?? "";
+                    str = await sr.ReadLineAsync();
                     position = sr.BaseStream.Position;
                     if (string.IsNullOrEmpty(str)) continue;
 
@@ -138,6 +138,11 @@ namespace YoutubeLiveChatToDiscord
                 {
                     logger.LogError("{error}", e.Message);
                     logger.LogError("{originalString}", str);
+                }
+                catch (IOException e)
+                {
+                    logger.LogError("{error}", e.Message);
+                    break;
                 }
             }
         }

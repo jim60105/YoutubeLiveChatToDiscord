@@ -32,6 +32,7 @@ public class LiveChatDownloadWorker : BackgroundService
             SubLang = "live_chat",
             SkipDownload = true,
             NoPart = true,
+            NoContinue = true,
             Output = "%(id)s"
         };
         live_chatOptionSet.AddCustomOption("--ignore-no-formats-error", true);
