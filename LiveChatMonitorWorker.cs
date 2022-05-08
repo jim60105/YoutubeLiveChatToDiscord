@@ -2,6 +2,7 @@ using Discord;
 using Discord.Webhook;
 using Newtonsoft.Json;
 using YoutubeLiveChatToDiscord.Models;
+using YoutubeLiveChatToDiscord.Services;
 
 namespace YoutubeLiveChatToDiscord
 {
@@ -12,11 +13,15 @@ namespace YoutubeLiveChatToDiscord
         private readonly DiscordWebhookClient client;
         private readonly FileInfo liveChatFileInfo;
         private long position = 0;
+        private readonly LiveChatDownloadService liveChatDownloadService;
 
-        public LiveChatMonitorWorker(ILogger<LiveChatMonitorWorker> _logger,
-                                     DiscordWebhookClient _client)
+        public LiveChatMonitorWorker(
+            ILogger<LiveChatMonitorWorker> _logger,
+            DiscordWebhookClient _client,
+            LiveChatDownloadService _liveChatDownloadService
+            )
         {
-            (logger, client) = (_logger, _client);
+            (logger, client, liveChatDownloadService) = (_logger, _client, _liveChatDownloadService);
             client.Log += Helper.DiscordWebhookClient_Log;
 
             id = Environment.GetEnvironmentVariable("VIDEO_ID") ?? "";
@@ -27,29 +32,54 @@ namespace YoutubeLiveChatToDiscord
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                try
+                while (!stoppingToken.IsCancellationRequested)
                 {
-                    while (!liveChatFileInfo.Exists && !stoppingToken.IsCancellationRequested)
+                    if (liveChatDownloadService.DownloadProcess.IsCompleted)
                     {
-                        logger.LogInformation("Chat json file not found. {jsonFile}", liveChatFileInfo.FullName);
-                        logger.LogInformation($"Wait for {nameof(LiveChatDownloadWorker)} to start.");
-                        await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-                        liveChatFileInfo.Refresh();
+                        _ = liveChatDownloadService.ExecuteAsync(stoppingToken)
+                                                   .ContinueWith((_) =>
+                                                   {
+                                                       logger.LogInformation("yt-dlp is stopped.");
+                                                   }, stoppingToken);
                     }
-                    await Monitoring(stoppingToken);
+
+                    logger.LogInformation("Wait 10 seconds.");
+                    await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                    liveChatFileInfo.Refresh();
+
+                    try
+                    {
+                        if (!liveChatFileInfo.Exists)
+                        {
+                            throw new FileNotFoundException(null, liveChatFileInfo.FullName);
+                        }
+
+                        await Monitoring(stoppingToken);
+                    }
+                    catch (FileNotFoundException e)
+                    {
+                        logger.LogWarning("Json file not found. {FileName}", e.FileName);
+                    }
                 }
-                catch (FileNotFoundException)
-                {
-                    logger.LogWarning("Chat json file not found. {jsonFile}", liveChatFileInfo.FullName);
-                    logger.LogWarning("Wait 10 seconds and try again.");
-                }
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-                liveChatFileInfo.Refresh();
+            }
+            catch (TaskCanceledException) { }
+            finally
+            {
+                logger.LogError("Wait 10 seconds before closing the program. This is to prevent a restart loop from hanging the machine.");
+#pragma warning disable CA2016 // 將 'CancellationToken' 參數轉送給方法
+                await Task.Delay(TimeSpan.FromSeconds(10));
+#pragma warning restore CA2016 // 將 'CancellationToken' 參數轉送給方法
             }
         }
 
+        /// <summary>
+        /// Monitoring
+        /// </summary>
+        /// <param name="stoppingToken"></param>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <returns></returns>
         private async Task Monitoring(CancellationToken stoppingToken)
         {
             await GetVideoInfo(stoppingToken);
@@ -74,6 +104,11 @@ namespace YoutubeLiveChatToDiscord
                 {
                     await ProcessChats(stoppingToken);
                 }
+                else if (liveChatDownloadService.DownloadProcess.IsCompleted)
+                {
+                    logger.LogInformation("Download process is stopped. Restart monitoring.");
+                    return;
+                }
                 else
                 {
                     position = liveChatFileInfo.Length;
@@ -82,21 +117,23 @@ namespace YoutubeLiveChatToDiscord
                     await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
                 }
             }
-
-            return;
         }
 
+        /// <summary>
+        /// GetVideoInfo
+        /// </summary>
+        /// <param name="stoppingToken"></param>
+        /// <returns></returns>
+        /// <exception cref="FileNotFoundException"></exception>
         private async Task GetVideoInfo(CancellationToken stoppingToken)
         {
             FileInfo videoInfo = new($"{id}.info.json");
-            while (!videoInfo.Exists && !stoppingToken.IsCancellationRequested)
+            if (!videoInfo.Exists)
             {
                 // Chat json file 在 VideoInfo json file之後被產生，理論上這段不會進來
-                logger.LogInformation("VideoInfo json file not found. {jsonFile}", videoInfo.FullName);
-                logger.LogInformation($"Wait for {nameof(LiveChatDownloadWorker)} to start.");
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-                videoInfo.Refresh();
+                throw new FileNotFoundException(null, videoInfo.FullName);
             }
+
             Info? info = JsonConvert.DeserializeObject<Info>(await new StreamReader(videoInfo.OpenRead()).ReadToEndAsync());
             string? Title = info?.title;
             string? ChannelId = info?.uploader_id;
