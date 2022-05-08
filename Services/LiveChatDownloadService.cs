@@ -15,13 +15,6 @@ public class LiveChatDownloadService
 
         id = Environment.GetEnvironmentVariable("VIDEO_ID") ?? "";
         if (string.IsNullOrEmpty(id)) throw new ArgumentException(nameof(id));
-
-        // 更新ytdlp
-        logger.LogInformation("Start updating yt-dlp.");
-        new YoutubeDL()
-        {
-            YoutubeDLPath = Helper.WhereIsYt_dlp()
-        }.RunUpdate().Wait();
     }
 
     public Task ExecuteAsync(CancellationToken stoppingToken)
