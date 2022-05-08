@@ -88,6 +88,15 @@ services:
     #   - ./cookies.txt:/app/cookies.txt
     # Youtube videoId, discord webhook url
     command: ["rhXNPqjPQw4", ""]
+  youtubelivechattodiscord_Rifa:
+    image: ghcr.io/jim60105/youtubelivechattodiscord
+    labels: *default-label
+    restart: on-failure:3  # yt-dlp is easyily to get stuck in a restart-failed loop during long-term downloads
+    # volumes: 
+    #   - ./appsettings.json:/app/appsettings.json
+    #   - ./cookies.txt:/app/cookies.txt
+    # Youtube videoId, discord webhook url
+    command: ["fV0mnPNB3g0", ""]
 
   # Restart main container every hour.
   jobber:
