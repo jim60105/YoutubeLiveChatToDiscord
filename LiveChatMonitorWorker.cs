@@ -109,7 +109,10 @@ namespace YoutubeLiveChatToDiscord
 
         private async Task ProcessChats(CancellationToken stoppingToken)
         {
-            using StreamReader sr = new(liveChatFileInfo.OpenRead());
+            // Reading a file used by another process
+            // https://stackoverflow.com/a/9760751
+            using FileStream fs = new(liveChatFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using StreamReader sr = new(fs);
 
             sr.BaseStream.Seek(position, SeekOrigin.Begin);
             while (position < sr.BaseStream.Length)
@@ -117,7 +120,7 @@ namespace YoutubeLiveChatToDiscord
                 string? str = "";
                 try
                 {
-                    str = await sr.ReadLineAsync() ?? "";
+                    str = await sr.ReadLineAsync();
                     position = sr.BaseStream.Position;
                     if (string.IsNullOrEmpty(str)) continue;
 
@@ -135,6 +138,11 @@ namespace YoutubeLiveChatToDiscord
                 {
                     logger.LogError("{error}", e.Message);
                     logger.LogError("{originalString}", str);
+                }
+                catch (IOException e)
+                {
+                    logger.LogError("{error}", e.Message);
+                    break;
                 }
             }
         }
