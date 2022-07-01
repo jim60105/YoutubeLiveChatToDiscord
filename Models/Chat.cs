@@ -4,17 +4,7 @@
  * https://json2csharp.com/
  */
 
-// Chat myDeserializedClass = JsonConvert.DeserializeObject<Chat>(myJsonResponse);
-
 #pragma warning disable IDE1006 // 命名樣式
-
-// Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
-//public class Thumbnail
-//{
-//    public string url { get; set; }
-//    public int width { get; set; }
-//    public int height { get; set; }
-//}
 
 public class ContextMenuButton
 {
@@ -70,6 +60,8 @@ public class Run
 {
     public Emoji? emoji { get; set; }
     public string? text { get; set; }
+    public bool bold { get; set; }
+    public bool italics { get; set; }
 }
 
 public class Message
@@ -184,6 +176,7 @@ public class LiveChatPaidMessageRenderer
 public class Text
 {
     public string? simpleText { get; set; }
+    public List<Run>? runs { get; set; }
 }
 
 public class UrlEndpoint
@@ -282,6 +275,7 @@ public class Item
     public LiveChatPaidStickerRenderer? liveChatPaidStickerRenderer { get; set; }
     public LiveChatTickerPaidMessageItemRenderer? liveChatTickerPaidMessageItemRenderer { get; set; }
     public LiveChatMembershipItemRenderer? liveChatMembershipItemRenderer { get; set; }
+    public LiveChatModeChangeMessageRenderer? liveChatModeChangeMessageRenderer { get; set; }
 }
 
 public class AddChatItemAction
@@ -455,6 +449,7 @@ public class Action
     public AddLiveChatTickerItemAction? addLiveChatTickerItemAction { get; set; }
     public ShowLiveChatTooltipCommand? showLiveChatTooltipCommand { get; set; }
     public AddBannerToLiveChatCommand? addBannerToLiveChatCommand { get; set; }
+    public ReplaceChatItemAction? replaceChatItemAction { get; set; }
 }
 
 public class ReplayChatItemAction
@@ -467,6 +462,38 @@ public class Chat
     public ReplayChatItemAction? replayChatItemAction { get; set; }
     public string? videoOffsetTimeMsec { get; set; }
     public bool isLive { get; set; }
+}
+
+public class LiveChatModeChangeMessageRenderer
+{
+    public string? id { get; set; }
+    public string? timestampUsec { get; set; }
+    public Icon? icon { get; set; }
+    public Text? text { get; set; }
+    public Subtext? subtext { get; set; }
+}
+
+public class Root
+{
+    public ReplayChatItemAction? replayChatItemAction { get; set; }
+    public string? videoOffsetTimeMsec { get; set; }
+    public bool isLive { get; set; }
+}
+
+public class Subtext
+{
+    public List<Run>? runs { get; set; }
+}
+
+public class ReplaceChatItemAction
+{
+    public string? targetItemId { get; set; }
+    public ReplacementItem? replacementItem { get; set; }
+}
+
+public class ReplacementItem
+{
+    public LiveChatTextMessageRenderer? liveChatTextMessageRenderer { get; set; }
 }
 
 #pragma warning restore IDE1006 // 命名樣式

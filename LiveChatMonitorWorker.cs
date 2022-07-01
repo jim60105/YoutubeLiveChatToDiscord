@@ -203,6 +203,15 @@ namespace YoutubeLiveChatToDiscord
             LiveChatPaidMessageRenderer? liveChatPaidMessage = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatPaidMessageRenderer;
             LiveChatPaidStickerRenderer? liveChatPaidSticker = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatPaidStickerRenderer;
 
+            // ReplaceChat: Treat as a new message
+            // This is rare and not easy to test.
+            // If it behaves strangely, please open a new issue with more examples.
+            LiveChatTextMessageRenderer? replaceChat = chat.replayChatItemAction?.actions?.FirstOrDefault()?.replaceChatItemAction?.replacementItem?.liveChatTextMessageRenderer;
+            if (null != replaceChat)
+            {
+                liveChatTextMessage = replaceChat;
+            }
+
             // Normal Message
             if (null != liveChatTextMessage)
             {
@@ -321,6 +330,10 @@ namespace YoutubeLiveChatToDiscord
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatMembershipItemRenderer
                 // SC Ticker messages.
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addLiveChatTickerItemAction
+                // Delete messages.
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.markChatItemAsDeletedAction
+                // Live chat mode change.
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatModeChangeMessageRenderer
             ) { return; }
             else
             {
