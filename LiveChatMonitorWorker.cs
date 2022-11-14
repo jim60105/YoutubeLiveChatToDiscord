@@ -332,6 +332,8 @@ namespace YoutubeLiveChatToDiscord
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addLiveChatTickerItemAction
                 // Delete messages.
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.markChatItemAsDeletedAction
+                // Remove Chat Item. Not really sure what this is.
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.removeChatItemAction
                 // Live chat mode change.
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatModeChangeMessageRenderer
             ) { return; }

@@ -450,6 +450,12 @@ public class Action
     public ShowLiveChatTooltipCommand? showLiveChatTooltipCommand { get; set; }
     public AddBannerToLiveChatCommand? addBannerToLiveChatCommand { get; set; }
     public ReplaceChatItemAction? replaceChatItemAction { get; set; }
+    public RemoveChatItemAction? removeChatItemAction { get; set; }
+}
+
+public class RemoveChatItemAction
+{
+    public string? targetItemId { get; set; }
 }
 
 public class ReplayChatItemAction
