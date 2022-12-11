@@ -26,6 +26,8 @@ public class LiveChatBannerHeaderRenderer
 public class Header
 {
     public LiveChatBannerHeaderRenderer? liveChatBannerHeaderRenderer { get; set; }
+    public PollHeaderRenderer? pollHeaderRenderer { get; set; }
+
 }
 
 public class AccessibilityData
@@ -36,6 +38,7 @@ public class AccessibilityData
 
 public class Accessibility
 {
+    public string? label { get; set; }
     public AccessibilityData? accessibilityData { get; set; }
 }
 
@@ -211,6 +214,8 @@ public class ButtonRenderer
     public AccessibilityData? accessibilityData { get; set; }
     public Icon? icon { get; set; }
     public Command? command { get; set; }
+    public Accessibility? accessibility { get; set; }
+    public string? targetId { get; set; }
 }
 
 public class ActionButton
@@ -441,6 +446,22 @@ public class AddBannerToLiveChatCommand
     public BannerRenderer? bannerRenderer { get; set; }
 }
 
+public class RemoveBannerForLiveChatCommand
+{
+    public string? targetActionId { get; set; }
+}
+
+public class UpdateLiveChatPollAction
+{
+    public PollToUpdate? pollToUpdate { get; set; }
+}
+
+public class CloseLiveChatActionPanelAction
+{
+    public string? targetPanelId { get; set; }
+    public bool skipOnDismissCommand { get; set; }
+}
+
 public class Action
 {
     public string? clickTrackingParams { get; set; }
@@ -451,6 +472,9 @@ public class Action
     public AddBannerToLiveChatCommand? addBannerToLiveChatCommand { get; set; }
     public ReplaceChatItemAction? replaceChatItemAction { get; set; }
     public RemoveChatItemAction? removeChatItemAction { get; set; }
+    public RemoveBannerForLiveChatCommand? removeBannerForLiveChatCommand { get; set; }
+    public UpdateLiveChatPollAction? updateLiveChatPollAction { get; set; }
+    public CloseLiveChatActionPanelAction? closeLiveChatActionPanelAction { get; set; }
 }
 
 public class RemoveChatItemAction
@@ -500,6 +524,69 @@ public class ReplaceChatItemAction
 public class ReplacementItem
 {
     public LiveChatTextMessageRenderer? liveChatTextMessageRenderer { get; set; }
+}
+
+public class Choice
+{
+    public Text? text { get; set; }
+    public bool selected { get; set; }
+    public double voteRatio { get; set; }
+    public VotePercentage? votePercentage { get; set; }
+    public SelectServiceEndpoint? selectServiceEndpoint { get; set; }
+}
+
+public class MetadataText
+{
+    public List<Run>? runs { get; set; }
+}
+
+public class PollHeaderRenderer
+{
+    public PollQuestion? pollQuestion { get; set; }
+    public Thumbnail? thumbnail { get; set; }
+    public MetadataText? metadataText { get; set; }
+    public string? liveChatPollType { get; set; }
+    public ContextMenuButton? contextMenuButton { get; set; }
+}
+
+public class PollQuestion
+{
+    public List<Run>? runs { get; set; }
+}
+
+public class PollRenderer
+{
+    public List<Choice>? choices { get; set; }
+    public string? liveChatPollId { get; set; }
+    public Header? header { get; set; }
+}
+
+public class PollToUpdate
+{
+    public PollRenderer? pollRenderer { get; set; }
+}
+
+public class SelectServiceEndpoint
+{
+    public CommandMetadata? commandMetadata { get; set; }
+    public SendLiveChatVoteEndpoint? sendLiveChatVoteEndpoint { get; set; }
+}
+
+public class SendLiveChatVoteEndpoint
+{
+    public string? @params { get; set; }
+}
+
+public class Thumbnail2
+{
+    public string? url { get; set; }
+    public int width { get; set; }
+    public int height { get; set; }
+}
+
+public class VotePercentage
+{
+    public string? simpleText { get; set; }
 }
 
 #pragma warning restore IDE1006 // 命名樣式

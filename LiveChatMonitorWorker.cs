@@ -322,6 +322,7 @@ namespace YoutubeLiveChatToDiscord
             else if (
                 // Banner Pinned message.
                 null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addBannerToLiveChatCommand
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.removeBannerForLiveChatCommand
                 // Click to show less.
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.showLiveChatTooltipCommand
                 // Welcome to live chat! Remember to guard your privacy and abide by our community guidelines.
@@ -336,6 +337,9 @@ namespace YoutubeLiveChatToDiscord
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.removeChatItemAction
                 // Live chat mode change.
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatModeChangeMessageRenderer
+                // Poll
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.updateLiveChatPollAction
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.closeLiveChatActionPanelAction 
             ) { return; }
             else
             {
