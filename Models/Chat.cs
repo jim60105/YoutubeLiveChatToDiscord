@@ -423,6 +423,7 @@ public class ShowLiveChatTooltipCommand
 public class Contents
 {
     public LiveChatTextMessageRenderer? liveChatTextMessageRenderer { get; set; }
+    public PollRenderer? pollRenderer { get; set; }
 }
 
 public class LiveChatBannerRenderer
@@ -475,6 +476,7 @@ public class Action
     public RemoveBannerForLiveChatCommand? removeBannerForLiveChatCommand { get; set; }
     public UpdateLiveChatPollAction? updateLiveChatPollAction { get; set; }
     public CloseLiveChatActionPanelAction? closeLiveChatActionPanelAction { get; set; }
+    public ShowLiveChatActionPanelAction? showLiveChatActionPanelAction { get; set; }
 }
 
 public class RemoveChatItemAction
@@ -559,6 +561,7 @@ public class PollRenderer
     public List<Choice>? choices { get; set; }
     public string? liveChatPollId { get; set; }
     public Header? header { get; set; }
+    public string? trackingParams { get; set; }
 }
 
 public class PollToUpdate
@@ -568,6 +571,7 @@ public class PollToUpdate
 
 public class SelectServiceEndpoint
 {
+    public string? clickTrackingParams { get; set; }
     public CommandMetadata? commandMetadata { get; set; }
     public SendLiveChatVoteEndpoint? sendLiveChatVoteEndpoint { get; set; }
 }
@@ -577,16 +581,26 @@ public class SendLiveChatVoteEndpoint
     public string? @params { get; set; }
 }
 
-public class Thumbnail2
-{
-    public string? url { get; set; }
-    public int width { get; set; }
-    public int height { get; set; }
-}
-
 public class VotePercentage
 {
     public string? simpleText { get; set; }
+}
+
+public class LiveChatActionPanelRenderer
+{
+    public Contents? contents { get; set; }
+    public string? id { get; set; }
+    public string? targetId { get; set; }
+}
+
+public class PanelToShow
+{
+    public LiveChatActionPanelRenderer? liveChatActionPanelRenderer { get; set; }
+}
+
+public class ShowLiveChatActionPanelAction
+{
+    public PanelToShow? panelToShow { get; set; }
 }
 
 #pragma warning restore IDE1006 // 命名樣式

@@ -340,6 +340,7 @@ namespace YoutubeLiveChatToDiscord
                 // Poll
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.updateLiveChatPollAction
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.closeLiveChatActionPanelAction 
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.showLiveChatActionPanelAction
             ) { return; }
             else
             {
