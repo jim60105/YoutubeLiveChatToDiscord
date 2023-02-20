@@ -4,9 +4,13 @@ FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine AS base
 WORKDIR /app
 RUN apk add --no-cache --virtual build-deps musl-dev gcc g++ python3-dev &&\
     apk add --no-cache py3-pip tzdata &&\
-    pip install yt-dlp==2022.2.4 &&\
+    pip install yt-dlp &&\
     apk del build-deps
 ENV TZ=Asia/Taipei
+
+# Disable file locking on Unix
+# https://github.com/dotnet/runtime/issues/34126#issuecomment-1104981659
+ENV DOTNET_SYSTEM_IO_DISABLEFILELOCKING=true
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src

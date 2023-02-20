@@ -146,8 +146,15 @@ namespace YoutubeLiveChatToDiscord
 
         private async Task ProcessChats(CancellationToken stoppingToken)
         {
-            // Reading a file used by another process
-            // https://stackoverflow.com/a/9760751
+            // Notice: yt-dlp在Linux會使用lock鎖定此檔案，在Windows不鎖定。
+            // 實作: https://github.com/yt-dlp/yt-dlp/commit/897376719871279eef89426b1452abb89051f0dc
+            // Issue: https://github.com/yt-dlp/yt-dlp/issues/3124
+            // 不像Windows是獨占鎖，Linux上是諮詢鎖，程式可以自行決定是否遵守鎖定。
+            // FileStream「會」遵守鎖定，所以此處會在開啟檔案時報錯。
+            // 詳細說明請參考這個issue，其中的討論過程非常清楚: https://github.com/dotnet/runtime/issues/34126
+            // 這是.NET Core在Linux、Windows上關於鎖定設計的描述: https://github.com/dotnet/runtime/pull/55256
+            // 如果要繞過這個問題，從.NET 6開始，可以加上環境變數「DOTNET_SYSTEM_IO_DISABLEFILELOCKING」讓FileStream「不」遵守鎖定。
+            // (本專案已在Dockerfile加上此環境變數)
             using FileStream fs = new(liveChatFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using StreamReader sr = new(fs);
 
