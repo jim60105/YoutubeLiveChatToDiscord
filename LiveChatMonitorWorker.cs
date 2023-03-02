@@ -136,7 +136,7 @@ namespace YoutubeLiveChatToDiscord
 
             Info? info = JsonConvert.DeserializeObject<Info>(await new StreamReader(videoInfo.OpenRead()).ReadToEndAsync());
             string? Title = info?.title;
-            string? ChannelId = info?.uploader_id;
+            string? ChannelId = info?.channel_id;
             string? thumb = info?.thumbnail;
 
             Environment.SetEnvironmentVariable("TITLE", Title);
@@ -241,6 +241,7 @@ namespace YoutubeLiveChatToDiscord
                   .WithIconUrl(authorBadgeUrl);
 
                 // From Stream Owner
+                //if (liveChatTextMessage.authorBadges?[0].liveChatAuthorBadgeRenderer?.icon?.iconType == "OWNER")
                 if (liveChatTextMessage.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
                 {
                     eb.WithColor(Color.Gold);
