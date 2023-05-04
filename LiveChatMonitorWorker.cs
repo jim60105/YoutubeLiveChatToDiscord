@@ -206,14 +206,15 @@ namespace YoutubeLiveChatToDiscord
               .WithThumbnailUrl(Helper.GetOriginalImage(Environment.GetEnvironmentVariable("VIDEO_THUMB")));
             string author = "";
 
-            LiveChatTextMessageRenderer? liveChatTextMessage = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatTextMessageRenderer;
-            LiveChatPaidMessageRenderer? liveChatPaidMessage = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatPaidMessageRenderer;
-            LiveChatPaidStickerRenderer? liveChatPaidSticker = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatPaidStickerRenderer;
+            var liveChatTextMessage = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatTextMessageRenderer;
+            var liveChatPaidMessage = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatPaidMessageRenderer;
+            var liveChatPaidSticker = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatPaidStickerRenderer;
+            var liveChatPurchaseSponsorshipsGift = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatSponsorshipsGiftPurchaseAnnouncementRenderer;
 
             // ReplaceChat: Treat as a new message
             // This is rare and not easy to test.
             // If it behaves strangely, please open a new issue with more examples.
-            LiveChatTextMessageRenderer? replaceChat = chat.replayChatItemAction?.actions?.FirstOrDefault()?.replaceChatItemAction?.replacementItem?.liveChatTextMessageRenderer;
+            var replaceChat = chat.replayChatItemAction?.actions?.FirstOrDefault()?.replaceChatItemAction?.replacementItem?.liveChatTextMessageRenderer;
             if (null != replaceChat)
             {
                 liveChatTextMessage = replaceChat;
@@ -326,6 +327,46 @@ namespace YoutubeLiveChatToDiscord
 
                 eb.WithFooter(ft);
             }
+            else if (null != liveChatPurchaseSponsorshipsGift && null != liveChatPurchaseSponsorshipsGift?.header?.liveChatSponsorshipsHeaderRenderer)
+            // Purchase Sponsorships Gift
+            {
+                LiveChatSponsorshipsHeaderRenderer header = liveChatPurchaseSponsorshipsGift.header.liveChatSponsorshipsHeaderRenderer;
+                author = header.authorName?.simpleText ?? "";
+                string authorPhoto = Helper.GetOriginalImage(header.authorPhoto?.thumbnails?.LastOrDefault()?.url);
+
+                eb.WithDescription("")
+                  .WithAuthor(new EmbedAuthorBuilder().WithName(author)
+                                                      .WithUrl($"https://www.youtube.com/channel/{liveChatPurchaseSponsorshipsGift?.authorExternalChannelId}")
+                                                      .WithIconUrl(authorPhoto));
+
+                // Gift Amount
+                eb.WithFields(new EmbedFieldBuilder[] { new EmbedFieldBuilder().WithName("Amount").WithValue(header?.primaryText?.runs?[1].text) });
+
+                // Gift Background Color
+                Color bgColor = (Color)System.Drawing.ColorTranslator.FromHtml("#0f9d58");
+                eb.WithColor(bgColor);
+
+                // Gift Picture
+                string? giftThumbUrl = header?.image?.thumbnails?.LastOrDefault()?.url;
+                if (null != giftThumbUrl) eb.WithThumbnailUrl(giftThumbUrl);
+
+                // Timestamp
+                long timeStamp = long.TryParse(liveChatPurchaseSponsorshipsGift?.timestampUsec, out long l) ? l / 1000 : 0;
+                EmbedFooterBuilder ft = new();
+                ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
+                                          .LocalDateTime
+                                          .ToString("yyyy/MM/dd HH:mm:ss"))
+                  .WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/wallet.png");
+
+                // From Stream Owner
+                if (liveChatPurchaseSponsorshipsGift?.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
+                {
+                    //eb.WithColor(Color.Gold);
+                    ft.WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/crown.png");
+                }
+
+                eb.WithFooter(ft);
+            }
             // Discrad known garbage messages.
             else if (
                 // Banner Pinned message.
@@ -347,8 +388,10 @@ namespace YoutubeLiveChatToDiscord
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatModeChangeMessageRenderer
                 // Poll
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.updateLiveChatPollAction
-                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.closeLiveChatActionPanelAction 
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.closeLiveChatActionPanelAction
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.showLiveChatActionPanelAction
+                // Sponsorships Gift redemption
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatSponsorshipsGiftRedemptionAnnouncementRenderer
             ) { return; }
             else
             {

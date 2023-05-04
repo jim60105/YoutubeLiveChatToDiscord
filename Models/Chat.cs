@@ -26,6 +26,7 @@ public class LiveChatBannerHeaderRenderer
 public class Header
 {
     public LiveChatBannerHeaderRenderer? liveChatBannerHeaderRenderer { get; set; }
+    public LiveChatSponsorshipsHeaderRenderer? liveChatSponsorshipsHeaderRenderer { get; set; }
     public PollHeaderRenderer? pollHeaderRenderer { get; set; }
 
 }
@@ -281,6 +282,8 @@ public class Item
     public LiveChatTickerPaidMessageItemRenderer? liveChatTickerPaidMessageItemRenderer { get; set; }
     public LiveChatMembershipItemRenderer? liveChatMembershipItemRenderer { get; set; }
     public LiveChatModeChangeMessageRenderer? liveChatModeChangeMessageRenderer { get; set; }
+    public LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer? liveChatSponsorshipsGiftPurchaseAnnouncementRenderer { get; set; }
+    public LiveChatSponsorshipsGiftRedemptionAnnouncementRenderer? liveChatSponsorshipsGiftRedemptionAnnouncementRenderer { get; set; }
 }
 
 public class AddChatItemAction
@@ -601,6 +604,43 @@ public class PanelToShow
 public class ShowLiveChatActionPanelAction
 {
     public PanelToShow? panelToShow { get; set; }
+}
+
+public class LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer
+{
+    public string? id { get; set; }
+    public string? timestampUsec { get; set; }
+    public string? authorExternalChannelId { get; set; }
+    public Header? header { get; set; }
+}
+
+public class LiveChatSponsorshipsGiftRedemptionAnnouncementRenderer
+{
+    public string? id { get; set; }
+    public string? timestampUsec { get; set; }
+    public string? authorExternalChannelId { get; set; }
+    public AuthorName? authorName { get; set; }
+    public AuthorPhoto? authorPhoto { get; set; }
+    public Message? message { get; set; }
+    public ContextMenuEndpoint? contextMenuEndpoint { get; set; }
+    public ContextMenuAccessibility? contextMenuAccessibility { get; set; }
+    public string? trackingParams { get; set; }
+}
+
+public class LiveChatSponsorshipsHeaderRenderer
+{
+    public AuthorName? authorName { get; set; }
+    public AuthorPhoto? authorPhoto { get; set; }
+    public PrimaryText? primaryText { get; set; }
+    public List<AuthorBadge>? authorBadges { get; set; }
+    public ContextMenuEndpoint? contextMenuEndpoint { get; set; }
+    public ContextMenuAccessibility? contextMenuAccessibility { get; set; }
+    public Image? image { get; set; }
+}
+
+public class PrimaryText
+{
+    public List<Run>? runs { get; set; }
 }
 
 #pragma warning restore IDE1006 // 命名樣式
