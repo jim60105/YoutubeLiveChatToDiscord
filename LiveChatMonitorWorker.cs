@@ -392,6 +392,8 @@ namespace YoutubeLiveChatToDiscord
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.showLiveChatActionPanelAction
                 // Sponsorships Gift redemption
                 || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatSponsorshipsGiftRedemptionAnnouncementRenderer
+                // Have no idea what this is
+                || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatPlaceholderItemRenderer
             ) { return; }
             else
             {
