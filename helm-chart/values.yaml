@@ -1,0 +1,14 @@
+deployments:
+  - name: demo1
+    youtubeId: dHT1kFn96G0
+    discordWebhook: https://discord.com/api/webhooks/9000000000000/OOXXOOXX
+    useCookies: false
+
+cookies: |
+  # Netscape HTTP Cookie File
+  # http://curl.haxx.se/rfc/cookie_spec.html
+  # This is a generated file!  Do not edit.
+  .youtube.com	TRUE	/	FALSE	1703311569	HSID	AAAABBBBCCCCSSSSS
+  .youtube.com	TRUE	/	TRUE	1703311569	SSID	HHHHJJJJJKKKKLLLL
+
+kubernetesClusterDomain: cluster.local

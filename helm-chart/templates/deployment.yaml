@@ -1,0 +1,60 @@
+{{- range .Values.deployments }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "youtube-live-chat-to-discord.fullname" $ }}-{{ .name }}
+  labels:
+    {{- include "youtube-live-chat-to-discord.labels" $ | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .name }}
+    {{- include "youtube-live-chat-to-discord.selectorLabels" $ | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}
+      {{- include "youtube-live-chat-to-discord.selectorLabels" $ | nindent 8 }}
+    spec:
+      restartPolicy: Always
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: {{ .name }}
+          args:
+          - {{ quote .youtubeId }}
+          - {{ quote .discordWebhook }}
+          env:
+          - name: KUBERNETES_CLUSTER_DOMAIN
+            value: {{ quote $.Values.kubernetesClusterDomain }}
+          image: ghcr.io/jim60105/youtubelivechattodiscord:latest
+          resources: 
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: "RuntimeDefault"
+            runAsUser: 1000
+            runAsGroup: 1000
+{{- if .useCookies }}
+          # copy /cookies.txt to /app/cookies.txt and run the original entrypoint ["dotnet", "YoutubeLiveChatToDiscord.dll"]
+          command: 
+            - "/bin/sh"
+            - "-c"
+            - "cp /cookies.txt /app/cookies.txt && dotnet /app/YoutubeLiveChatToDiscord.dll {{ .youtubeId }} {{ .discordWebhook }}"
+          volumeMounts:
+          - mountPath: /cookies.txt
+            name: cookies
+            subPath: cookies.txt
+      volumes:
+      - name: cookies
+        configMap:
+          name: {{ include "youtube-live-chat-to-discord.fullname" $ }}-cookies
+{{- end }}
+{{- end }}

@@ -37,6 +37,15 @@ Docker請將`cookies.txt` mount 至 `/app/cookies.txt`
 docker run -rm ghcr.io/jim60105/youtubelivechattodiscord [Video_Id] [Discord_Webhook_Url]
 ```
 
+## Kubernetes Helm Chart
+
+```sh
+git clone https://github.com/jim60105/YoutubeLiveChatToDiscord.git
+cd YoutubeLiveChatToDiscord/helm-chart
+vim values.yaml
+helm install [Release_Name] .
+```
+
 ### Timezone
 
 Default timezone is `Asia/Taipei`. Please change it with `TZ` environment variable.
