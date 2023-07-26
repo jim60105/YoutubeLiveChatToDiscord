@@ -32,8 +32,11 @@ spec:
           image: ghcr.io/jim60105/youtubelivechattodiscord:latest
           resources: 
             limits:
-              memory: "128Mi"
-              cpu: "500m"
+              memory: "512Mi"
+              cpu: "20m"
+            requests:
+              memory: "256Mi"
+              cpu: "10m"
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
