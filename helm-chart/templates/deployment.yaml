@@ -29,14 +29,16 @@ spec:
           env:
           - name: KUBERNETES_CLUSTER_DOMAIN
             value: {{ quote $.Values.kubernetesClusterDomain }}
+          - name: Logging__LogLevel__Default
+            value: Debug
           image: ghcr.io/jim60105/youtubelivechattodiscord:latest
           resources: 
             limits:
               memory: "512Mi"
-              cpu: "20m"
+              cpu: "100m"
             requests:
               memory: "256Mi"
-              cpu: "10m"
+              cpu: "50m"
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
