@@ -37,6 +37,8 @@ Docker請將`cookies.txt` mount 至 `/app/cookies.txt`
 docker run -rm ghcr.io/jim60105/youtubelivechattodiscord [Video_Id] [Discord_Webhook_Url]
 ```
 
+Also available at [quay.io](https://quay.io/jim60105/youtubelivechattodiscord)
+
 ## Kubernetes Helm Chart
 
 ```sh
