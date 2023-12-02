@@ -4,6 +4,10 @@ name: docker_publish
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
+    branches:
+      - "master"
+    tags:
+      - "*"
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -18,13 +22,13 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: true 
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v5
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }},ghcr.io/${{ github.repository }},quay.io/${{ github.repository }}
           # set latest tag for default branch
@@ -33,12 +37,15 @@ jobs:
             type=ref,event=tag
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+     
       # Create a Access Token and save it as as Actions secret
       # https://hub.docker.com/settings/security
       # DOCKERHUB_USERNAME
       # DOCKERHUB_TOKEN
       - name: Login to DockerHub
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -46,23 +53,24 @@ jobs:
       # Create a Access Token with `read:packages` and `write:packages` scopes
       # CR_PAT
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
       - name: Login to Quay Container Registry
-        uses: docker/login-action@v1 
+        uses: docker/login-action@v3
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64, linux/arm64
