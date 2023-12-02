@@ -1,0 +1,50 @@
+### Base image
+FROM registry.access.redhat.com/ubi9/ubi-minimal AS base
+
+ENV TZ=Asia/Taipei
+RUN microdnf -y install python3.11 tzdata && \
+    microdnf clean all && \
+    ln -s /usr/bin/python3.11 /usr/bin/python3
+
+RUN python3 -m venv /venv
+ENV PATH="/venv/bin:$PATH"
+
+### Build yt-dlp
+FROM base AS build_ytdlp
+
+RUN microdnf -y install python3.11-pip && \
+    pip3.11 install yt-dlp && \
+    microdnf -y remove python3.11-pip && \
+    microdnf clean all
+
+### Build .NET
+FROM registry.access.redhat.com/ubi8/dotnet-80 AS build
+
+USER 0
+WORKDIR /src
+
+COPY YoutubeLiveChatToDiscord.csproj .
+RUN dotnet restore "./YoutubeLiveChatToDiscord.csproj"
+COPY . .
+
+RUN dotnet publish "YoutubeLiveChatToDiscord.csproj" -c Release -o /src/publish -p:PublishTrimmed=true --self-contained true
+
+### Final image
+FROM base AS final
+
+# Disable file locking on Unix
+# https://github.com/dotnet/runtime/issues/34126#issuecomment-1104981659
+ENV DOTNET_SYSTEM_IO_DISABLEFILELOCKING=true
+
+# Determines whether a .NET Core app runs in globalization-invariant mode without access to culture-specific data and behavior.
+# https://aka.ms/dotnet-missing-libicu
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
+
+WORKDIR /app
+
+COPY --link --chown=1001:1001 --from=build /src/publish .
+COPY --link --from=build_ytdlp /venv /venv
+
+USER 0
+
+ENTRYPOINT ./YoutubeLiveChatToDiscord $@
