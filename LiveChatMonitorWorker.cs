@@ -8,26 +8,26 @@ namespace YoutubeLiveChatToDiscord
 {
     public class LiveChatMonitorWorker : BackgroundService
     {
-        private readonly ILogger<LiveChatMonitorWorker> logger;
-        private readonly string id;
-        private readonly DiscordWebhookClient client;
-        private readonly FileInfo liveChatFileInfo;
-        private long position = 0;
-        private readonly LiveChatDownloadService liveChatDownloadService;
+        private readonly ILogger<LiveChatMonitorWorker> _logger;
+        private readonly string _id;
+        private readonly DiscordWebhookClient _client;
+        private readonly FileInfo _liveChatFileInfo;
+        private long _position = 0;
+        private readonly LiveChatDownloadService _liveChatDownloadService;
 
         public LiveChatMonitorWorker(
-            ILogger<LiveChatMonitorWorker> _logger,
-            DiscordWebhookClient _client,
-            LiveChatDownloadService _liveChatDownloadService
+            ILogger<LiveChatMonitorWorker> logger,
+            DiscordWebhookClient client,
+            LiveChatDownloadService liveChatDownloadService
             )
         {
-            (logger, client, liveChatDownloadService) = (_logger, _client, _liveChatDownloadService);
-            client.Log += Helper.DiscordWebhookClient_Log;
+            (_logger, _client, _liveChatDownloadService) = (logger, client, liveChatDownloadService);
+            _client.Log += Helper.DiscordWebhookClient_Log;
 
-            id = Environment.GetEnvironmentVariable("VIDEO_ID") ?? "";
-            if (string.IsNullOrEmpty(id)) throw new ArgumentException(nameof(id));
+            _id = Environment.GetEnvironmentVariable("VIDEO_ID") ?? "";
+            if (string.IsNullOrEmpty(_id)) throw new ArgumentException(nameof(_id));
 
-            liveChatFileInfo = new($"{id}.live_chat.json");
+            _liveChatFileInfo = new($"{_id}.live_chat.json");
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,38 +36,35 @@ namespace YoutubeLiveChatToDiscord
             {
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    if (liveChatDownloadService.DownloadProcess.IsCompleted)
+                    if (_liveChatDownloadService.downloadProcess.IsCompleted)
                     {
-                        _ = liveChatDownloadService.ExecuteAsync(stoppingToken)
-                                                   .ContinueWith((_) =>
-                                                   {
-                                                       logger.LogInformation("yt-dlp is stopped.");
-                                                   }, stoppingToken);
+                        _ = _liveChatDownloadService.ExecuteAsync(stoppingToken)
+                                                   .ContinueWith((_) => _logger.LogInformation("yt-dlp is stopped."), stoppingToken);
                     }
 
-                    logger.LogInformation("Wait 10 seconds.");
+                    _logger.LogInformation("Wait 10 seconds.");
                     await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-                    liveChatFileInfo.Refresh();
+                    _liveChatFileInfo.Refresh();
 
                     try
                     {
-                        if (!liveChatFileInfo.Exists)
+                        if (!_liveChatFileInfo.Exists)
                         {
-                            throw new FileNotFoundException(null, liveChatFileInfo.FullName);
+                            throw new FileNotFoundException(null, _liveChatFileInfo.FullName);
                         }
 
                         await Monitoring(stoppingToken);
                     }
                     catch (FileNotFoundException e)
                     {
-                        logger.LogWarning("Json file not found. {FileName}", e.FileName);
+                        _logger.LogWarning("Json file not found. {FileName}", e.FileName);
                     }
                 }
             }
             catch (TaskCanceledException) { }
             finally
             {
-                logger.LogError("Wait 10 seconds before closing the program. This is to prevent a restart loop from hanging the machine.");
+                _logger.LogError("Wait 10 seconds before closing the program. This is to prevent a restart loop from hanging the machine.");
 #pragma warning disable CA2016 // 將 'CancellationToken' 參數轉送給方法
                 await Task.Delay(TimeSpan.FromSeconds(10));
 #pragma warning restore CA2016 // 將 'CancellationToken' 參數轉送給方法
@@ -87,32 +84,32 @@ namespace YoutubeLiveChatToDiscord
 #if !DEBUG
             if (null == Environment.GetEnvironmentVariable("SKIP_STARTUP_WAITING"))
             {
-                logger.LogInformation("Wait 1 miunute to skip old chats");
+                _logger.LogInformation("Wait 1 miunute to skip old chats");
                 await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
-                liveChatFileInfo.Refresh();
+                _liveChatFileInfo.Refresh();
             }
 #endif
 
-            position = liveChatFileInfo.Length;
-            logger.LogInformation("Start at position: {position}", position);
-            logger.LogInformation("Start Monitoring!");
+            _position = _liveChatFileInfo.Length;
+            _logger.LogInformation("Start at position: {position}", _position);
+            _logger.LogInformation("Start Monitoring!");
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                liveChatFileInfo.Refresh();
-                if (liveChatFileInfo.Length > position)
+                _liveChatFileInfo.Refresh();
+                if (_liveChatFileInfo.Length > _position)
                 {
                     await ProcessChats(stoppingToken);
                 }
-                else if (liveChatDownloadService.DownloadProcess.IsCompleted)
+                else if (_liveChatDownloadService.downloadProcess.IsCompleted)
                 {
-                    logger.LogInformation("Download process is stopped. Restart monitoring.");
+                    _logger.LogInformation("Download process is stopped. Restart monitoring.");
                     return;
                 }
                 else
                 {
-                    position = liveChatFileInfo.Length;
-                    logger.LogTrace("No new chat. Wait 10 seconds.");
+                    _position = _liveChatFileInfo.Length;
+                    _logger.LogTrace("No new chat. Wait 10 seconds.");
                     // 每10秒檢查一次json檔
                     await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
                 }
@@ -127,14 +124,14 @@ namespace YoutubeLiveChatToDiscord
         /// <exception cref="FileNotFoundException"></exception>
         private async Task GetVideoInfo(CancellationToken stoppingToken)
         {
-            FileInfo videoInfo = new($"{id}.info.json");
+            FileInfo videoInfo = new($"{_id}.info.json");
             if (!videoInfo.Exists)
             {
                 // Chat json file 在 VideoInfo json file之後被產生，理論上這段不會進來
                 throw new FileNotFoundException(null, videoInfo.FullName);
             }
 
-            Info? info = JsonConvert.DeserializeObject<Info>(await new StreamReader(videoInfo.OpenRead()).ReadToEndAsync());
+            Info? info = JsonConvert.DeserializeObject<Info>(await new StreamReader(videoInfo.OpenRead()).ReadToEndAsync(stoppingToken));
             string? Title = info?.title;
             string? ChannelId = info?.channel_id;
             string? thumb = info?.thumbnail;
@@ -155,17 +152,17 @@ namespace YoutubeLiveChatToDiscord
             // 這是.NET Core在Linux、Windows上關於鎖定設計的描述: https://github.com/dotnet/runtime/pull/55256
             // 如果要繞過這個問題，從.NET 6開始，可以加上環境變數「DOTNET_SYSTEM_IO_DISABLEFILELOCKING」讓FileStream「不」遵守鎖定。
             // (本專案已在Dockerfile加上此環境變數)
-            using FileStream fs = new(liveChatFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using FileStream fs = new(_liveChatFileInfo.FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using StreamReader sr = new(fs);
 
-            sr.BaseStream.Seek(position, SeekOrigin.Begin);
-            while (position < sr.BaseStream.Length)
+            sr.BaseStream.Seek(_position, SeekOrigin.Begin);
+            while (_position < sr.BaseStream.Length)
             {
                 string? str = "";
                 try
                 {
-                    str = await sr.ReadLineAsync();
-                    position = sr.BaseStream.Position;
+                    str = await sr.ReadLineAsync(stoppingToken);
+                    _position = sr.BaseStream.Position;
                     if (string.IsNullOrEmpty(str)) continue;
 
                     Chat? chat = JsonConvert.DeserializeObject<Chat>(str);
@@ -175,17 +172,17 @@ namespace YoutubeLiveChatToDiscord
                 }
                 catch (JsonSerializationException e)
                 {
-                    logger.LogError("{error}", e.Message);
-                    logger.LogError("{originalString}", str);
+                    _logger.LogError("{error}", e.Message);
+                    _logger.LogError("{originalString}", str);
                 }
                 catch (ArgumentException e)
                 {
-                    logger.LogError("{error}", e.Message);
-                    logger.LogError("{originalString}", str);
+                    _logger.LogError("{error}", e.Message);
+                    _logger.LogError("{originalString}", str);
                 }
                 catch (IOException e)
                 {
-                    logger.LogError("{error}", e.Message);
+                    _logger.LogError("{error}", e.Message);
                     break;
                 }
             }
@@ -202,7 +199,7 @@ namespace YoutubeLiveChatToDiscord
         {
             EmbedBuilder eb = new();
             eb.WithTitle(Environment.GetEnvironmentVariable("TITLE") ?? "")
-              .WithUrl($"https://youtu.be/{id}")
+              .WithUrl($"https://youtu.be/{_id}")
               .WithThumbnailUrl(Helper.GetOriginalImage(Environment.GetEnvironmentVariable("VIDEO_THUMB")));
             string author = "";
 
@@ -397,13 +394,13 @@ namespace YoutubeLiveChatToDiscord
             ) { return; }
             else
             {
-                logger.LogWarning("Message type not supported, skip sending to discord.");
+                _logger.LogWarning("Message type not supported, skip sending to discord.");
                 throw new ArgumentException("Message type not supported", nameof(chat));
             }
 
             if (stoppingToken.IsCancellationRequested) return;
 
-            logger.LogDebug("Sending Request to Discord: {author}: {message}", author, eb.Description);
+            _logger.LogDebug("Sending Request to Discord: {author}: {message}", author, eb.Description);
 
             try
             {
@@ -420,15 +417,15 @@ namespace YoutubeLiveChatToDiscord
 
             // The rate for Discord webhooks are 30 requests/minute per channel.
             // Be careful when you run multiple instances in the same channel!
-            logger.LogTrace("Wait 2 seconds for discord webhook rate limit");
+            _logger.LogTrace("Wait 2 seconds for discord webhook rate limit");
             await Task.Delay(TimeSpan.FromSeconds(2), stoppingToken);
 
             Task SendMessage()
-               => client.SendMessageAsync(embeds: new Embed[] { eb.Build() })
+               => _client.SendMessageAsync(embeds: new Embed[] { eb.Build() })
                    .ContinueWith(async p =>
                    {
                        ulong messageId = await p;
-                       logger.LogDebug("Message sent to discord, message id: {messageId}", messageId);
+                       _logger.LogDebug("Message sent to discord, message id: {messageId}", messageId);
                    }, stoppingToken);
         }
     }

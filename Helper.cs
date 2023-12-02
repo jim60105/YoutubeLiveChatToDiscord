@@ -15,7 +15,7 @@ public static class Helper
         internal static ILogger CreateLogger(string categoryName) => LoggerFactory.CreateLogger(categoryName);
     }
 
-    private static readonly ILogger logger = ApplicationLogging.CreateLogger("Helper");
+    private static readonly ILogger _logger = ApplicationLogging.CreateLogger("Helper");
 
     /// <summary>
     /// 尋找yt-dlp程式路徑
@@ -25,14 +25,14 @@ public static class Helper
     {
         // https://stackoverflow.com/a/63021455
         string file = "yt-dlp";
-        string[] paths = Environment.GetEnvironmentVariable("PATH")?.Split(';') ?? Array.Empty<string>();
-        string[] extensions = Environment.GetEnvironmentVariable("PATHEXT")?.Split(';') ?? Array.Empty<string>();
+        string[] paths = Environment.GetEnvironmentVariable("PATH")?.Split(';') ?? [];
+        string[] extensions = Environment.GetEnvironmentVariable("PATHEXT")?.Split(';') ?? [];
         string YtdlPath = (from p in new[] { Environment.CurrentDirectory }.Concat(paths)
                            from e in extensions
                            let path = Path.Combine(p.Trim(), file + e.ToLower())
                            where File.Exists(path)
                            select path)?.FirstOrDefault() ?? "/usr/bin/yt-dlp";
-        logger.LogDebug("Found yt-dlp at {path}", YtdlPath);
+        _logger.LogDebug("Found yt-dlp at {path}", YtdlPath);
         return YtdlPath;
     }
 
@@ -42,33 +42,31 @@ public static class Helper
     /// <param name="arg"></param>
     /// <returns></returns>
     internal static Task DiscordWebhookClient_Log(LogMessage arg)
-    {
-        return Task.Run(() =>
+        => Task.Run(() =>
         {
             switch (arg.Severity)
             {
                 case LogSeverity.Critical:
-                    logger.LogCritical("{message}", arg);
+                    _logger.LogCritical("{message}", arg);
                     break;
                 case LogSeverity.Error:
-                    logger.LogError("{message}", arg);
+                    _logger.LogError("{message}", arg);
                     break;
                 case LogSeverity.Warning:
-                    logger.LogWarning("{message}", arg);
+                    _logger.LogWarning("{message}", arg);
                     break;
                 case LogSeverity.Info:
-                    logger.LogInformation("{message}", arg);
+                    _logger.LogInformation("{message}", arg);
                     break;
                 case LogSeverity.Verbose:
-                    logger.LogTrace("{message}", arg);
+                    _logger.LogTrace("{message}", arg);
                     break;
                 case LogSeverity.Debug:
                 default:
-                    logger.LogDebug("{message}", arg);
+                    _logger.LogDebug("{message}", arg);
                     break;
             }
         });
-    }
 
     /// <summary>
     /// 處理Youtube的圖片url，取得原始尺寸圖片

@@ -5,22 +5,22 @@ namespace YoutubeLiveChatToDiscord.Services;
 
 public class LiveChatDownloadService
 {
-    private readonly ILogger<LiveChatDownloadService> logger;
-    private readonly string id;
-    public Task<int> DownloadProcess = Task.FromResult(0);
+    private readonly ILogger<LiveChatDownloadService> _logger;
+    private readonly string _id;
+    public Task<int> downloadProcess = Task.FromResult(0);
 
-    public LiveChatDownloadService(ILogger<LiveChatDownloadService> _logger)
+    public LiveChatDownloadService(ILogger<LiveChatDownloadService> logger)
     {
-        logger = _logger;
+        _logger = logger;
 
-        id = Environment.GetEnvironmentVariable("VIDEO_ID") ?? "";
-        if (string.IsNullOrEmpty(id)) throw new ArgumentException(nameof(id));
+        _id = Environment.GetEnvironmentVariable("VIDEO_ID") ?? "";
+        if (string.IsNullOrEmpty(_id)) throw new ArgumentException(nameof(_id));
     }
 
     public Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        DownloadProcess = ExecuteAsyncInternal(stoppingToken);
-        return DownloadProcess;
+        downloadProcess = ExecuteAsyncInternal(stoppingToken);
+        return downloadProcess;
     }
 
     private Task<int> ExecuteAsyncInternal(CancellationToken stoppingToken)
@@ -28,14 +28,14 @@ public class LiveChatDownloadService
         OptionSet live_chatOptionSet = new()
         {
             IgnoreConfig = true,
-            WriteSub = true,
-            SubLang = "live_chat",
+            WriteSubs = true,
+            SubLangs = "live_chat",
             SkipDownload = true,
             NoPart = true,
             NoContinue = true,
-            Output = "%(id)s"
+            Output = "%(id)s",
+            IgnoreNoFormatsError = true
         };
-        live_chatOptionSet.AddCustomOption("--ignore-no-formats-error", true);
 
         OptionSet info_jsonOptionSet = new()
         {
@@ -43,9 +43,9 @@ public class LiveChatDownloadService
             WriteInfoJson = true,
             SkipDownload = true,
             NoPart = true,
-            Output = "%(id)s"
+            Output = "%(id)s",
+            IgnoreNoFormatsError = true
         };
-        info_jsonOptionSet.AddCustomOption("--ignore-no-formats-error", true);
 
         if (File.Exists("cookies.txt"))
         {
@@ -54,18 +54,18 @@ public class LiveChatDownloadService
         }
 
         YoutubeDLProcess ytdlProc = new(Helper.WhereIsYt_dlp());
-        ytdlProc.OutputReceived += (o, e) => logger.LogTrace("{message}", e.Data);
-        ytdlProc.ErrorReceived += (o, e) => logger.LogError("{error}", e.Data);
+        ytdlProc.OutputReceived += (o, e) => _logger.LogTrace("{message}", e.Data);
+        ytdlProc.ErrorReceived += (o, e) => _logger.LogError("{error}", e.Data);
 
-        string url = $"https://www.youtube.com/watch?v={id}";
-        logger.LogInformation("Start yt-dlp with url: {url}", url);
+        string url = $"https://www.youtube.com/watch?v={_id}";
+        _logger.LogInformation("Start yt-dlp with url: {url}", url);
         return ytdlProc.RunAsync(new string[] { url },
-                                    info_jsonOptionSet,
-                                    stoppingToken)
-                          .ContinueWith((e) => ytdlProc.RunAsync(new string[] { url },
-                                                                 live_chatOptionSet,
-                                                                 stoppingToken))
-                          .Unwrap();
+                                 info_jsonOptionSet,
+                                 stoppingToken)
+                       .ContinueWith((e) => ytdlProc.RunAsync(new string[] { url },
+                                                              live_chatOptionSet,
+                                                              stoppingToken))
+                       .Unwrap();
 
     }
 }
