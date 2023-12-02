@@ -37,6 +37,15 @@ jobs:
             type=ref,event=tag
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
 
+      - name: Docker meta-ubi
+        id: meta-ubi
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }},ghcr.io/${{ github.repository }},quay.io/${{ github.repository }}
+          # set latest tag for default branch
+          tags: |
+            type=raw,value=ubi
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
      
@@ -70,7 +79,18 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64, linux/arm64
+
+      - name: Build and push UBI
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.ubi
+          push: true
+          tags: ${{ steps.meta-ubi.outputs.tags }}
+          labels: ${{ steps.meta-ubi.outputs.labels }}
           platforms: linux/amd64, linux/arm64
