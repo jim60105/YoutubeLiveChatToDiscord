@@ -31,7 +31,7 @@ public static class Helper
                            from e in extensions
                            let path = Path.Combine(p.Trim(), file + e.ToLower())
                            where File.Exists(path)
-                           select path)?.FirstOrDefault() ?? "/usr/bin/yt-dlp";
+                           select path)?.FirstOrDefault() ?? "/venv/bin/yt-dlp";
         _logger.LogDebug("Found yt-dlp at {path}", YtdlPath);
         return YtdlPath;
     }

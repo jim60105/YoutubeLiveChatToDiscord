@@ -1,0 +1,81 @@
+### Python
+FROM registry.access.redhat.com/ubi9/ubi-minimal AS python
+
+ENV PYTHON_VERSION=3.11
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONIOENCODING=UTF-8
+ARG PIP_DISABLE_PIP_VERSION_CHECK=1
+ARG PIP_NO_CACHE_DIR=1
+
+RUN microdnf -y install python3.11 python3.11-pip && \
+    microdnf -y clean all
+
+RUN python3.11 -m venv /venv && \
+    source /venv/bin/activate &&\
+    pip3.11 install yt-dlp && \
+    pip3.11 uninstall -y setuptools pip && \
+    microdnf -y remove python3.11-pip && \
+    microdnf -y clean all && \
+    rm -rf /var/cache/yum/*
+
+ENV PATH="/venv/bin:$PATH"
+
+### Base image
+FROM python AS base
+
+WORKDIR /app
+
+RUN microdnf -y install libicu tzdata && \
+    microdnf -y clean all && \
+    rm -rf /var/cache/yum/*
+
+ENV TZ=Asia/Taipei
+
+# Disable file locking on Unix
+# https://github.com/dotnet/runtime/issues/34126#issuecomment-1104981659
+ENV DOTNET_SYSTEM_IO_DISABLEFILELOCKING=true
+
+
+### Debug image
+FROM base AS debug
+
+# Install .NET 8 SDK
+RUN microdnf -y install dotnet-sdk-8.0
+
+
+### Build .NET
+FROM registry.access.redhat.com/ubi8/dotnet-80 AS build
+
+USER 0
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
+
+COPY YoutubeLiveChatToDiscord.csproj .
+ARG TARGETPLATFORM
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+    dotnet restore "YoutubeLiveChatToDiscord.csproj" -r linux-x64; \
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+    dotnet restore "YoutubeLiveChatToDiscord.csproj" -r linux-arm64; \
+    fi
+
+FROM build AS publish
+COPY . .
+ARG BUILD_CONFIGURATION=Release
+ARG TARGETPLATFORM
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+    dotnet publish "YoutubeLiveChatToDiscord.csproj" -c $BUILD_CONFIGURATION -o /app/publish -r linux-x64; \
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+    dotnet publish "YoutubeLiveChatToDiscord.csproj" -c $BUILD_CONFIGURATION -o /app/publish -r linux-arm64; \
+    fi
+
+
+### Final image
+FROM base AS final
+
+ENV PATH="/app:$PATH"
+
+COPY --link --chown=1001:1001 --from=publish /app/publish .
+
+USER 1001
+
+ENTRYPOINT ["YoutubeLiveChatToDiscord"]
