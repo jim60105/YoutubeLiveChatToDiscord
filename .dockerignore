@@ -23,3 +23,7 @@
 **/values.dev.yaml
 LICENSE
 README.md
+**/helm-chart
+**/.github
+.dockerignore
+.gitignore

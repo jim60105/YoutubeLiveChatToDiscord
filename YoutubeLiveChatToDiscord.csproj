@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
-
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-LiveChatToDiscord-ACE24696-7DD5-4164-8805-CF76B90CBA6C</UserSecretsId>
@@ -9,11 +8,10 @@
     <DockerfileContext>.</DockerfileContext>
     <ServerGarbageCollection>false</ServerGarbageCollection>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Discord.Net.Webhook" Version="3.8.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-    <PackageReference Include="YoutubeDLSharp" Version="0.4.2" />
+    <PackageReference Include="Discord.Net.Webhook" Version="3.13.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+    <PackageReference Include="YoutubeDLSharp" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
   </ItemGroup>
 </Project>
