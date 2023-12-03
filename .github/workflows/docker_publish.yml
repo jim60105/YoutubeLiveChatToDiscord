@@ -100,24 +100,24 @@ jobs:
           labels: ${{ steps.meta-ubi.outputs.labels }}
           platforms: linux/amd64
 
-      - name: Build and push arm64
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          target: final
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/arm64
+      # - name: Build and push arm64
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: ./Dockerfile
+      #     push: true
+      #     target: final
+      #     tags: ${{ steps.meta.outputs.tags }}
+      #     labels: ${{ steps.meta.outputs.labels }}
+      #     platforms: linux/arm64
 
-      - name: Build and push UBI arm64
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.ubi
-          push: true
-          target: final
-          tags: ${{ steps.meta-ubi.outputs.tags }}
-          labels: ${{ steps.meta-ubi.outputs.labels }}
-          platforms: linux/arm64
+      # - name: Build and push UBI arm64
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     file: ./Dockerfile.ubi
+      #     push: true
+      #     target: final
+      #     tags: ${{ steps.meta-ubi.outputs.tags }}
+      #     labels: ${{ steps.meta-ubi.outputs.labels }}
+      #     platforms: linux/arm64
