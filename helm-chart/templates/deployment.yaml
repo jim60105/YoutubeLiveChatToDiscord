@@ -45,8 +45,8 @@ spec:
               drop: ["ALL"]
             seccompProfile:
               type: "RuntimeDefault"
-            runAsUser: 1000
-            runAsGroup: 1000
+            runAsUser: 1001
+            runAsGroup: 1001
 {{- if .useCookies }}
           # copy /cookies.txt to /app/cookies.txt and run the original entrypoint ["dotnet", "YoutubeLiveChatToDiscord.dll"]
           command: 
