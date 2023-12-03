@@ -47,10 +47,13 @@ public class LiveChatDownloadService
             IgnoreNoFormatsError = true
         };
 
-        if (File.Exists("cookies.txt"))
+        FileInfo cookies = new("cookies.txt");
+        if (cookies.Exists)
         {
-            live_chatOptionSet.Cookies = "cookies.txt";
-            info_jsonOptionSet.Cookies = "cookies.txt";
+            _logger.LogInformation("Detected {cookies}, use it for yt-dlp", cookies.FullName);
+            var bak = cookies.CopyTo("cookies.copy.txt", true);
+            live_chatOptionSet.Cookies = bak.FullName;
+            info_jsonOptionSet.Cookies = bak.FullName;
         }
 
         YoutubeDLProcess ytdlProc = new(Helper.WhereIsYt_dlp());
