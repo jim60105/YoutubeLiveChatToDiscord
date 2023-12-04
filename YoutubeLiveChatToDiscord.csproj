@@ -8,13 +8,20 @@
     <DockerfileContext>.</DockerfileContext>
     <ServerGarbageCollection>false</ServerGarbageCollection>
     <DockerfileFastModeStage>debug</DockerfileFastModeStage>
+    <IsTrimmable>true</IsTrimmable>
     <PublishTrimmed>true</PublishTrimmed>
-    <TrimMode>partial</TrimMode>
+    <TrimMode>full</TrimMode>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Discord.Net.Webhook" Version="3.13.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
     <PackageReference Include="YoutubeDLSharp" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <TrimmerRootAssembly Include="Discord.Net.Rest" />
+    <TrimmerRootAssembly Include="Newtonsoft.Json" />
+    <TrimmerRootAssembly Include="YoutubeDLSharp" />
+    <TrimmerRootAssembly Include="YoutubeLiveChatToDiscord" />
   </ItemGroup>
 </Project>
