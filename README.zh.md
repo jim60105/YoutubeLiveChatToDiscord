@@ -1,5 +1,7 @@
 # YoutubeLiveChatToDiscord
 
+[![CodeFactor](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/badge/master)](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/overview/master)
+
 ## 將 Youtube 聊天室串流至 Discord Webhook
 
 |                                                Youtube Live Chat                                                |     |                                                 Discord Webhook                                                 |
@@ -41,7 +43,7 @@ Docker 請將 `cookies.txt` mount 至 `/app/cookies.txt`
 * Discord Webhook 網址
 
 ```sh
-docker run -rm ghcr.io/jim60105/youtubelivechattodiscord [Video_Id] [Discord_Webhook_Url]
+docker run --rm ghcr.io/jim60105/youtubelivechattodiscord [Video_Id] [Discord_Webhook_Url]
 ```
 
 也可在[quay.io](https://quay.io/jim60105/youtubelivechattodiscord)取得。

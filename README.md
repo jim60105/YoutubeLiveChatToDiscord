@@ -1,5 +1,7 @@
 # YoutubeLiveChatToDiscord
 
+[![CodeFactor](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/badge/master)](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/overview/master)
+
 ## Stream Youtube chat to Discord Webhook
 
 |                                                Youtube Live Chat                                                |     |                                                 Discord Webhook                                                 |
