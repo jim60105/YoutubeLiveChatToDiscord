@@ -17,6 +17,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     {
         services.AddHostedService<LiveChatMonitorWorker>()
                 .AddSingleton<LiveChatDownloadService>()
+                .AddSingleton<DiscordService>()
                 .AddSingleton((service) => new DiscordWebhookClient(Environment.GetEnvironmentVariable("WEBHOOK")));
     })
     .Build();

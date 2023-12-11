@@ -1,5 +1,4 @@
-﻿using Discord;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace YoutubeLiveChatToDiscord;
 
@@ -35,38 +34,6 @@ public static class Helper
         _logger.LogDebug("Found yt-dlp at {path}", YtdlPath);
         return YtdlPath;
     }
-
-    /// <summary>
-    /// 把.NET Core logger對應到Discord內建的logger上面
-    /// </summary>
-    /// <param name="arg"></param>
-    /// <returns></returns>
-    internal static Task DiscordWebhookClient_Log(LogMessage arg)
-        => Task.Run(() =>
-        {
-            switch (arg.Severity)
-            {
-                case LogSeverity.Critical:
-                    _logger.LogCritical("{message}", arg);
-                    break;
-                case LogSeverity.Error:
-                    _logger.LogError("{message}", arg);
-                    break;
-                case LogSeverity.Warning:
-                    _logger.LogWarning("{message}", arg);
-                    break;
-                case LogSeverity.Info:
-                    _logger.LogInformation("{message}", arg);
-                    break;
-                case LogSeverity.Verbose:
-                    _logger.LogTrace("{message}", arg);
-                    break;
-                case LogSeverity.Debug:
-                default:
-                    _logger.LogDebug("{message}", arg);
-                    break;
-            }
-        });
 
     /// <summary>
     /// 處理Youtube的圖片url，取得原始尺寸圖片

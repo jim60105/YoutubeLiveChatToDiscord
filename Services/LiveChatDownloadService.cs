@@ -12,7 +12,6 @@ public class LiveChatDownloadService
     public LiveChatDownloadService(ILogger<LiveChatDownloadService> logger)
     {
         _logger = logger;
-
         _id = Environment.GetEnvironmentVariable("VIDEO_ID") ?? "";
         if (string.IsNullOrEmpty(_id)) throw new ArgumentException(nameof(_id));
     }
@@ -69,6 +68,5 @@ public class LiveChatDownloadService
                                                               live_chatOptionSet,
                                                               stoppingToken))
                        .Unwrap();
-
     }
 }
