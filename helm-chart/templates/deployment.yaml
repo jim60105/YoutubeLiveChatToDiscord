@@ -45,16 +45,11 @@ spec:
               drop: ["ALL"]
             seccompProfile:
               type: "RuntimeDefault"
-            runAsUser: 1001
-            runAsGroup: 1001
+            runAsUser: 1654
+            runAsGroup: 1654
 {{- if .useCookies }}
-          # copy /cookies.txt to /app/cookies.txt and run the original entrypoint ["dotnet", "YoutubeLiveChatToDiscord.dll"]
-          command: 
-            - "/bin/sh"
-            - "-c"
-            - "cp /cookies.txt /app/cookies.txt && dotnet /app/YoutubeLiveChatToDiscord.dll {{ .youtubeId }} {{ .discordWebhook }}"
           volumeMounts:
-          - mountPath: /cookies.txt
+          - mountPath: /app/cookies.txt
             name: cookies
             subPath: cookies.txt
       volumes:

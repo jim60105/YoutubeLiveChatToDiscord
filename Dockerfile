@@ -60,7 +60,7 @@ FROM base AS final
 
 ENV PATH="/app:$PATH"
 
-RUN mkdir -p /app && chown -R $APP_UID:$APP_UID /app
+RUN mkdir -p /app && chown -R $APP_UID:$APP_UID /app && chmod u+rwx /app
 COPY --from=publish --chown=$APP_UID:$APP_UID /app/publish/YoutubeLiveChatToDiscord /app/YoutubeLiveChatToDiscord
 COPY --from=publish --chown=$APP_UID:$APP_UID /app/publish/appsettings.json /app/appsettings.json
 
