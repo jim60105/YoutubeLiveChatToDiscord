@@ -1,6 +1,7 @@
 using Discord;
 using Discord.Webhook;
-using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using YoutubeLiveChatToDiscord.Models;
 using YoutubeLiveChatToDiscord.Services;
 
@@ -122,6 +123,10 @@ namespace YoutubeLiveChatToDiscord
         /// <param name="stoppingToken"></param>
         /// <returns></returns>
         /// <exception cref="FileNotFoundException"></exception>
+        [UnconditionalSuppressMessage(
+            "Trimming",
+            "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+            Justification = $"{nameof(SourceGenerationContext)} is used.")]
         private async Task GetVideoInfo(CancellationToken stoppingToken)
         {
             FileInfo videoInfo = new($"{_id}.info.json");
@@ -131,7 +136,12 @@ namespace YoutubeLiveChatToDiscord
                 throw new FileNotFoundException(null, videoInfo.FullName);
             }
 
-            Info? info = JsonConvert.DeserializeObject<Info>(await new StreamReader(videoInfo.OpenRead()).ReadToEndAsync(stoppingToken));
+            Info? info = JsonSerializer.Deserialize<Info>(
+                await new StreamReader(videoInfo.OpenRead()).ReadToEndAsync(stoppingToken),
+                options: new()
+                {
+                    TypeInfoResolver = SourceGenerationContext.Default
+                });
             string? Title = info?.title;
             string? ChannelId = info?.channel_id;
             string? thumb = info?.thumbnail;
@@ -141,6 +151,10 @@ namespace YoutubeLiveChatToDiscord
             Environment.SetEnvironmentVariable("VIDEO_THUMB", thumb);
         }
 
+        [UnconditionalSuppressMessage(
+            "Trimming",
+            "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+            Justification = $"{nameof(SourceGenerationContext)} is used.")]
         private async Task ProcessChats(CancellationToken stoppingToken)
         {
             // Notice: yt-dlp在Linux會使用lock鎖定此檔案，在Windows不鎖定。
@@ -165,12 +179,17 @@ namespace YoutubeLiveChatToDiscord
                     _position = sr.BaseStream.Position;
                     if (string.IsNullOrEmpty(str)) continue;
 
-                    Chat? chat = JsonConvert.DeserializeObject<Chat>(str);
+                    Chat? chat = JsonSerializer.Deserialize<Chat>(
+                        str,
+                        options: new()
+                        {
+                            TypeInfoResolver = SourceGenerationContext.Default
+                        });
                     if (null == chat) continue;
 
                     await BuildRequestAndSendToDiscord(chat, stoppingToken);
                 }
-                catch (JsonSerializationException e)
+                catch (JsonException e)
                 {
                     _logger.LogError("{error}", e.Message);
                     _logger.LogError("{originalString}", str);

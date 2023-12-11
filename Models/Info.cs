@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace YoutubeLiveChatToDiscord.Models;
 
@@ -11,17 +11,17 @@ namespace YoutubeLiveChatToDiscord.Models;
 #pragma warning disable IDE1006 // 命名樣式
 public class HttpHeaders
 {
-    [JsonProperty("User-Agent")]
+    [JsonPropertyName("User-Agent")]
     public string? UserAgent { get; set; }
     public string? Accept { get; set; }
 
-    [JsonProperty("Accept-Encoding")]
+    [JsonPropertyName("Accept-Encoding")]
     public string? AcceptEncoding { get; set; }
 
-    [JsonProperty("Accept-Language")]
+    [JsonPropertyName("Accept-Language")]
     public string? AcceptLanguage { get; set; }
 
-    [JsonProperty("Sec-Fetch-Mode")]
+    [JsonPropertyName("Sec-Fetch-Mode")]
     public string? SecFetchMode { get; set; }
 }
 
@@ -873,10 +873,10 @@ public class AutomaticCaptions
     public List<Ca>? ca { get; set; }
     public List<Ceb>? ceb { get; set; }
 
-    [JsonProperty("zh-Hans")]
+    [JsonPropertyName("zh-Hans")]
     public List<ZhHan>? ZhHans { get; set; }
 
-    [JsonProperty("zh-Hant")]
+    [JsonPropertyName("zh-Hant")]
     public List<ZhHant>? ZhHant { get; set; }
     public List<Co>? co { get; set; }
     public List<Hr>? hr { get; set; }

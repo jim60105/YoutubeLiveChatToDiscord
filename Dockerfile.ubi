@@ -13,8 +13,8 @@ RUN microdnf -y install python3.11 python3.11-pip && \
     microdnf -y clean all
 
 RUN python3.11 -m venv /venv && \
-    source /venv/bin/activate &&\
-    pip3.11 install yt-dlp && \
+    source /venv/bin/activate && \
+    pip3.11 install --no-cache-dir yt-dlp && \
     pip3.11 uninstall -y setuptools pip && \
     microdnf -y remove python3.11-pip && \
     microdnf -y clean all
@@ -44,29 +44,21 @@ RUN microdnf -y install dotnet-sdk-8.0
 
 
 ### Build .NET
-FROM registry.access.redhat.com/ubi8/dotnet-80 AS build
+FROM --platform=$BUILDPLATFORM registry.access.redhat.com/ubi8/dotnet-80 AS build
 
 USER 0
 ARG BUILD_CONFIGURATION=Release
+ARG TARGETARCH
 WORKDIR /src
 
-COPY YoutubeLiveChatToDiscord.csproj .
-ARG TARGETPLATFORM
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-    dotnet restore "YoutubeLiveChatToDiscord.csproj" -r linux-x64; \
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-    dotnet restore "YoutubeLiveChatToDiscord.csproj" -r linux-arm64; \
-    fi
+COPY ["YoutubeLiveChatToDiscord.csproj", "."]
+RUN dotnet restore -a $TARGETARCH "YoutubeLiveChatToDiscord.csproj"
 
 FROM build AS publish
 COPY . .
 ARG BUILD_CONFIGURATION=Release
-ARG TARGETPLATFORM
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-    dotnet publish "YoutubeLiveChatToDiscord.csproj" -c $BUILD_CONFIGURATION -o /app/publish -r linux-x64; \
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-    dotnet publish "YoutubeLiveChatToDiscord.csproj" -c $BUILD_CONFIGURATION -o /app/publish -r linux-arm64; \
-    fi
+ARG TARGETARCH
+RUN dotnet publish "YoutubeLiveChatToDiscord.csproj" -a $TARGETARCH -c $BUILD_CONFIGURATION -o /app/publish --self-contained true
 
 
 ### Final image
@@ -74,8 +66,9 @@ FROM base AS final
 
 ENV PATH="/app:$PATH"
 
-COPY --link --chown=1001:1001 --from=publish /app/publish .
+RUN mkdir -p /app && chown -R 1001:1001 /app
+COPY --from=publish --chown=1001:1001 /app/publish/YoutubeLiveChatToDiscord /app/YoutubeLiveChatToDiscord
+COPY --from=publish --chown=1001:1001 /app/publish/appsettings.json /app/appsettings.json
 
 USER 1001
-
-ENTRYPOINT ["YoutubeLiveChatToDiscord"]
+ENTRYPOINT ["/app/YoutubeLiveChatToDiscord"]

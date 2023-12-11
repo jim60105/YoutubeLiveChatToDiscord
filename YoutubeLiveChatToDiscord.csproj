@@ -4,13 +4,15 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-LiveChatToDiscord-ACE24696-7DD5-4164-8805-CF76B90CBA6C</UserSecretsId>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PublishTrimmed>true</PublishTrimmed>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
-    <ServerGarbageCollection>false</ServerGarbageCollection>
     <DockerfileFastModeStage>debug</DockerfileFastModeStage>
-    <IsTrimmable>true</IsTrimmable>
-    <PublishTrimmed>true</PublishTrimmed>
-    <TrimMode>full</TrimMode>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Discord.Net.Webhook" Version="3.13.0" />
@@ -22,6 +24,5 @@
     <TrimmerRootAssembly Include="Discord.Net.Rest" />
     <TrimmerRootAssembly Include="Newtonsoft.Json" />
     <TrimmerRootAssembly Include="YoutubeDLSharp" />
-    <TrimmerRootAssembly Include="YoutubeLiveChatToDiscord" />
   </ItemGroup>
 </Project>

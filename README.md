@@ -41,7 +41,7 @@ Two parameters need to be passed in:
 - Discord Webhook URL
 
 ```sh
-docker run -rm ghcr.io/jim60105/youtubelivechattodiscord [Video_Id] [Discord_Webhook_Url]
+docker run --rm ghcr.io/jim60105/youtubelivechattodiscord [Video_Id] [Discord_Webhook_Url]
 ```
 
 Also available at [quay.io](https://quay.io/jim60105/youtubelivechattodiscord)
