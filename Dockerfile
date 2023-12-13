@@ -1,25 +1,5 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-### Base image for yt-dlp
-FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine AS base
-WORKDIR /app
-RUN apk add --no-cache tzdata python3 && \
-    apk add --no-cache --virtual build-deps musl-dev gcc g++ python3-dev py3-pip && \
-    python3 -m venv /venv && \
-    source /venv/bin/activate && \
-    pip install --no-cache-dir yt-dlp && \
-    pip uninstall -y setuptools pip && \
-    apk del build-deps
-
-ENV PATH="/venv/bin:$PATH"
-ENV TZ=Asia/Taipei
-
-# Disable file locking on Unix
-# https://github.com/dotnet/runtime/issues/34126#issuecomment-1104981659
-ENV DOTNET_SYSTEM_IO_DISABLEFILELOCKING=true
-
-### Debug image (same as base image)
-### Rename for VS fast mode stage debugging
+### Debug image
+### Setup the same as base image but used dotnet/runtime
 FROM mcr.microsoft.com/dotnet/runtime:8.0-alpine AS debug
 
 WORKDIR /app
@@ -38,6 +18,23 @@ ENV TZ=Asia/Taipei
 # https://github.com/dotnet/runtime/issues/34126#issuecomment-1104981659
 ENV DOTNET_SYSTEM_IO_DISABLEFILELOCKING=true
 
+### Base image for yt-dlp
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0-alpine AS base
+WORKDIR /app
+RUN apk add --no-cache tzdata python3 && \
+    apk add --no-cache --virtual build-deps musl-dev gcc g++ python3-dev py3-pip && \
+    python3 -m venv /venv && \
+    source /venv/bin/activate && \
+    pip install --no-cache-dir yt-dlp && \
+    pip uninstall -y setuptools pip && \
+    apk del build-deps
+
+ENV PATH="/venv/bin:$PATH"
+ENV TZ=Asia/Taipei
+
+# Disable file locking on Unix
+# https://github.com/dotnet/runtime/issues/34126#issuecomment-1104981659
+ENV DOTNET_SYSTEM_IO_DISABLEFILELOCKING=true
 
 ### Build .NET
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build

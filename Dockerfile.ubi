@@ -35,13 +35,11 @@ ENV TZ=Asia/Taipei
 # https://github.com/dotnet/runtime/issues/34126#issuecomment-1104981659
 ENV DOTNET_SYSTEM_IO_DISABLEFILELOCKING=true
 
-
 ### Debug image
 FROM base AS debug
 
 # Install .NET 8 SDK
 RUN microdnf -y install dotnet-sdk-8.0
-
 
 ### Build .NET
 FROM --platform=$BUILDPLATFORM registry.access.redhat.com/ubi8/dotnet-80 AS build
@@ -59,7 +57,6 @@ COPY . .
 ARG BUILD_CONFIGURATION=Release
 ARG TARGETARCH
 RUN dotnet publish "YoutubeLiveChatToDiscord.csproj" -a $TARGETARCH -c $BUILD_CONFIGURATION -o /app/publish --self-contained true
-
 
 ### Final image
 FROM base AS final
