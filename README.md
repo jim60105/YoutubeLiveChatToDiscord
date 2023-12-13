@@ -1,6 +1,11 @@
 # YoutubeLiveChatToDiscord
 
-[![CodeFactor](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/badge/master)](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/overview/master)
+[![CodeFactor](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/badge/master?style=for-the-badge)](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/overview/master)
+
+> [!CAUTION]  
+> Please take note of the AGPLv3 license that we are using.  
+> You _**MUST**_ share _the source code_ with _anyone who can access the services_ (the Discord messages published by this program).  
+> Share the URL of this GitHub repository, or publish the modified source code if any changes were made.
 
 ## Stream Youtube chat to Discord Webhook
 
@@ -60,3 +65,20 @@ helm install [Release_Name] .
 ### Timezone
 
 Default timezone is `Asia/Taipei`. Please change it with `TZ` environment variable.
+
+## LICENSE
+
+[![AGPL-3.0](https://github.com/jim60105/YoutubeLiveChatToDiscord/assets/16995691/8c588957-5e07-4f6d-a116-b3366c064342)](LICENSE)
+
+[GNU AFFERO GENERAL PUBLIC LICENSE Version 3](LICENSE)
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+> [!CAUTION]  
+> Please take note of the AGPLv3 license that we are using.  
+> You _**MUST**_ share _the source code_ with _anyone who can access the services_ (the Discord messages published by this program).  
+> Share the URL of this GitHub repository, or publish the modified source code if any changes were made.
