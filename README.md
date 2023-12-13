@@ -1,10 +1,10 @@
-# YoutubeLiveChatToDiscord
+# Youtube Live Chat To Discord
 
 [![CodeFactor](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/badge/master?style=for-the-badge)](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/overview/master)
 
 > [!CAUTION]  
-> Please take note of the AGPLv3 license that we are using.  
-> You _**MUST**_ share _the source code_ with _anyone who can access the services_ (the Discord messages published by this program).  
+> Please take note of the **AGPLv3** license that we are using.  
+> You _**MUST**_ share **the source code** with **anyone who can access the services** (service, which means the Discord messages published by this program).  
 > Share the URL of this GitHub repository, or publish the modified source code if any changes were made.
 
 ## Stream Youtube chat to Discord Webhook
@@ -79,6 +79,6 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 > [!CAUTION]  
-> Please take note of the AGPLv3 license that we are using.  
-> You _**MUST**_ share _the source code_ with _anyone who can access the services_ (the Discord messages published by this program).  
+> Please take note of the **AGPLv3** license that we are using.  
+> You _**MUST**_ share **the source code** with **anyone who can access the services** (the Discord messages published by this program).  
 > Share the URL of this GitHub repository, or publish the modified source code if any changes were made.
