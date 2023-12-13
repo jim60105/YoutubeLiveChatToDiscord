@@ -71,6 +71,7 @@ public class DiscordService
         var liveChatTextMessage = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatTextMessageRenderer;
         var liveChatPaidMessage = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatPaidMessageRenderer;
         var liveChatPaidSticker = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatPaidStickerRenderer;
+        var liveChatMembershipItemRenderer = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatMembershipItemRenderer;
         var liveChatPurchaseSponsorshipsGift = chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatSponsorshipsGiftPurchaseAnnouncementRenderer;
 
         // ReplaceChat: Treat as a new message
@@ -96,6 +97,11 @@ public class DiscordService
         // Super Chat Sticker
         {
             BuildSuperChatStickerMessage(ref eb, liveChatPaidSticker, out author);
+        }
+        else if (null != liveChatMembershipItemRenderer)
+        // Join Membership
+        {
+            BuildMemberShipMessage(ref eb, liveChatMembershipItemRenderer, out author);
         }
         else if (null != liveChatPurchaseSponsorshipsGift
                  && null != liveChatPurchaseSponsorshipsGift.header.liveChatSponsorshipsHeaderRenderer)
@@ -129,8 +135,6 @@ public class DiscordService
         || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.showLiveChatTooltipCommand
         // Welcome to live chat! Remember to guard your privacy and abide by our community guidelines.
         || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatViewerEngagementMessageRenderer
-        // Membership messages.
-        || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addChatItemAction?.item?.liveChatMembershipItemRenderer
         // SC Ticker messages.
         || null != chat.replayChatItemAction?.actions?.FirstOrDefault()?.addLiveChatTickerItemAction
         // Delete messages.
@@ -258,6 +262,43 @@ public class DiscordService
         return eb;
     }
 
+    private static EmbedBuilder BuildMemberShipMessage(ref EmbedBuilder eb, LiveChatMembershipItemRenderer liveChatMembershipItemRenderer, out string author)
+    {
+        List<Run> runs = liveChatMembershipItemRenderer.headerSubtext?.runs ?? new List<Run>();
+
+        author = liveChatMembershipItemRenderer.authorName?.simpleText ?? "";
+        string authorPhoto = Helper.GetOriginalImage(liveChatMembershipItemRenderer.authorPhoto?.thumbnails?.LastOrDefault()?.url);
+
+        eb.WithDescription(string.Join("", runs.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))))
+          .WithAuthor(new EmbedAuthorBuilder().WithName(author)
+                                              .WithUrl($"https://www.youtube.com/channel/{liveChatMembershipItemRenderer.authorExternalChannelId}")
+                                              .WithIconUrl(authorPhoto));
+
+        // Membership Background Color
+        Color sponsorColor = (Color)System.Drawing.ColorTranslator.FromHtml("#0F9D58");
+        eb.WithColor(sponsorColor);
+
+        // Timestamp
+        long timeStamp = long.TryParse(liveChatMembershipItemRenderer.timestampUsec, out long l) ? l / 1000 : 0;
+        EmbedFooterBuilder ft = new();
+        string authorBadgeUrl = Helper.GetOriginalImage(liveChatMembershipItemRenderer.authorBadges?.FirstOrDefault()?.liveChatAuthorBadgeRenderer?.customThumbnail?.thumbnails?.LastOrDefault()?.url);
+        ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
+                                  .LocalDateTime
+                                  .ToString("yyyy/MM/dd HH:mm:ss"))
+          .WithIconUrl(authorBadgeUrl);
+
+        // From Stream Owner
+        // I'm not sure if stream owner can join his own membership?
+        if (liveChatMembershipItemRenderer.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
+        {
+            //eb.WithColor(Color.Gold);
+            ft.WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/crown.png");
+        }
+
+        eb.WithFooter(ft);
+        return eb;
+    }
+
     private static EmbedBuilder BuildPurchaseSponsorshipsGiftMessage(ref EmbedBuilder eb, LiveChatSponsorshipsGiftPurchaseAnnouncementRenderer liveChatPurchaseSponsorshipsGift, out string author)
     {
         LiveChatSponsorshipsHeaderRenderer header = liveChatPurchaseSponsorshipsGift.header.liveChatSponsorshipsHeaderRenderer;
@@ -273,8 +314,8 @@ public class DiscordService
         eb.WithFields(new EmbedFieldBuilder[] { new EmbedFieldBuilder().WithName("Amount").WithValue(header?.primaryText?.runs?[1].text) });
 
         // Gift Background Color
-        Color bgColor = (Color)System.Drawing.ColorTranslator.FromHtml("#0f9d58");
-        eb.WithColor(bgColor);
+        Color sponsorColor = (Color)System.Drawing.ColorTranslator.FromHtml("#0F9D58");
+        eb.WithColor(sponsorColor);
 
         // Gift Picture
         string? giftThumbUrl = header?.image?.thumbnails?.LastOrDefault()?.url;
