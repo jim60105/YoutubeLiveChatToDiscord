@@ -163,14 +163,14 @@ public class Chat
         public AuthorPhoto authorPhoto { get; set; }
         public PurchaseAmountText purchaseAmountText { get; set; }
         public Message message { get; set; }
-        public object headerBackgroundColor { get; set; }
-        public object headerTextColor { get; set; }
-        public object bodyBackgroundColor { get; set; }
-        public object bodyTextColor { get; set; }
+        public long headerBackgroundColor { get; set; }
+        public long headerTextColor { get; set; }
+        public long bodyBackgroundColor { get; set; }
+        public long bodyTextColor { get; set; }
         public string authorExternalChannelId { get; set; }
-        public object authorNameTextColor { get; set; }
+        public long authorNameTextColor { get; set; }
         public ContextMenuEndpoint contextMenuEndpoint { get; set; }
-        public object timestampColor { get; set; }
+        public long timestampColor { get; set; }
         public ContextMenuAccessibility contextMenuAccessibility { get; set; }
         public string trackingParams { get; set; }
     }

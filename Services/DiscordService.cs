@@ -200,7 +200,7 @@ public class DiscordService
         eb.WithFields(new EmbedFieldBuilder[] { new EmbedFieldBuilder().WithName("Amount").WithValue(liveChatPaidMessage.purchaseAmountText?.simpleText) });
 
         // Super Chat Background Color
-        Color bgColor = (Color)System.Drawing.ColorTranslator.FromHtml(string.Format("#{0:X}", liveChatPaidMessage.bodyBackgroundColor));
+        Color bgColor = (Color)System.Drawing.ColorTranslator.FromHtml(Helper.YoutubeColorConverter(liveChatPaidMessage.bodyBackgroundColor));
         eb.WithColor(bgColor);
 
         // Timestamp
@@ -236,7 +236,7 @@ public class DiscordService
         eb.WithFields(new EmbedFieldBuilder[] { new EmbedFieldBuilder().WithName("Amount").WithValue(liveChatPaidSticker.purchaseAmountText?.simpleText) });
 
         // Super Chat Background Color
-        Color bgColor = (Color)System.Drawing.ColorTranslator.FromHtml(string.Format("#{0:X}", liveChatPaidSticker.backgroundColor));
+        Color bgColor = (Color)System.Drawing.ColorTranslator.FromHtml(Helper.YoutubeColorConverter(liveChatPaidSticker.backgroundColor));
         eb.WithColor(bgColor);
 
         // Super Chat Sticker Picture

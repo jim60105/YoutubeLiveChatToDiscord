@@ -75,4 +75,19 @@ public static class Helper
 
         return url;
     }
+
+    public static string YoutubeColorConverter(long color)
+    {
+        color &= 16777215;
+        long[] temp = [(color & 16711680) >> 16, (color & 65280) >> 8, color & 255];
+        int r = (int)temp[0];
+        int g = (int)temp[1];
+        int b = (int)temp[2];
+
+        if (r != (r & 255) || g != (g & 255) || b != (b & 255))
+            throw new Exception($"\"({r},{g},{b})\" is not a valid RGB color");
+
+        int hex = r << 16 | g << 8 | b;
+        return r < 16 ? "#" + (16777216 | hex).ToString("X")[1..] : "#" + hex.ToString("X");
+    }
 }
