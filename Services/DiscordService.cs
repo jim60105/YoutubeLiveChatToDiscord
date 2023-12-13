@@ -264,13 +264,31 @@ public class DiscordService
 
     private static EmbedBuilder BuildMemberShipMessage(ref EmbedBuilder eb, LiveChatMembershipItemRenderer liveChatMembershipItemRenderer, out string author)
     {
-        List<Run> runs = liveChatMembershipItemRenderer.headerSubtext?.runs ?? new List<Run>();
+        List<Run>? header = liveChatMembershipItemRenderer.headerPrimaryText?.runs
+                            ?? liveChatMembershipItemRenderer.headerSubtext?.runs;
+        List<Run>? message = liveChatMembershipItemRenderer.message?.runs;
 
         author = liveChatMembershipItemRenderer.authorName?.simpleText ?? "";
         string authorPhoto = Helper.GetOriginalImage(liveChatMembershipItemRenderer.authorPhoto?.thumbnails?.LastOrDefault()?.url);
 
-        eb.WithDescription(string.Join("", runs.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))))
-          .WithAuthor(new EmbedAuthorBuilder().WithName(author)
+        if (null != message)
+        {
+            eb.WithDescription(string.Join("", (message ?? []).Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))));
+            if (null != header)
+            {
+                eb.WithFields(new EmbedFieldBuilder[]
+                {
+                new EmbedFieldBuilder().WithName("Header")
+                                       .WithValue(string.Join("", header.Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))))
+                });
+            }
+        }
+        else if (null != header)
+        {
+            eb.WithDescription(string.Join("", (header ?? []).Select(p => p.text ?? (p.emoji?.searchTerms?.FirstOrDefault()))));
+        }
+
+        eb.WithAuthor(new EmbedAuthorBuilder().WithName(author)
                                               .WithUrl($"https://www.youtube.com/channel/{liveChatMembershipItemRenderer.authorExternalChannelId}")
                                               .WithIconUrl(authorPhoto));
 

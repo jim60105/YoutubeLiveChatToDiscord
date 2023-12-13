@@ -71,6 +71,11 @@ public class Chat
         public List<Run> runs { get; set; }
     }
 
+    public class HeaderPrimaryText
+    {
+        public List<Run> runs { get; set; }
+    }
+
     public class HeaderSubtext
     {
         public List<Run> runs { get; set; }
@@ -262,7 +267,9 @@ public class Chat
         public string id { get; set; }
         public string timestampUsec { get; set; }
         public string authorExternalChannelId { get; set; }
+        public HeaderPrimaryText headerPrimaryText { get; set; }
         public HeaderSubtext headerSubtext { get; set; }
+        public Message message { get; set; }
         public AuthorName authorName { get; set; }
         public AuthorPhoto authorPhoto { get; set; }
         public List<AuthorBadge> authorBadges { get; set; }
