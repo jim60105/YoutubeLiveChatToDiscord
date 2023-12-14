@@ -10,6 +10,11 @@ public class DiscordService
     private readonly ILogger<DiscordService> _logger;
     private readonly string _id;
     private readonly DiscordWebhookClient _client;
+    private static readonly Color _ownerColor = new(0xffd600);
+    private static readonly Color _sponsorColor = new(0x0f9d58);
+    private static readonly string _crownIcon = "https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/crown.png";
+    private static readonly string _walletIcon = "https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/wallet.png";
+    private static readonly string _giftIcon = "https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/gift.png";
 
     public DiscordService(
         ILogger<DiscordService> logger,
@@ -173,11 +178,10 @@ public class DiscordService
           .WithIconUrl(authorBadgeUrl);
 
         // From Stream Owner
-        //if (liveChatTextMessage.authorBadges?[0].liveChatAuthorBadgeRenderer?.icon?.iconType == "OWNER")
         if (liveChatTextMessage.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
         {
-            eb.WithColor(Color.Gold);
-            ft.WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/crown.png");
+            eb.WithColor(_ownerColor);
+            ft.WithIconUrl(_crownIcon);
         }
 
         eb.WithFooter(ft);
@@ -209,13 +213,13 @@ public class DiscordService
         ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
                                   .LocalDateTime
                                   .ToString("yyyy/MM/dd HH:mm:ss"))
-          .WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/wallet.png");
+          .WithIconUrl(_walletIcon);
 
         // From Stream Owner
         if (liveChatPaidMessage.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
         {
-            eb.WithColor(Color.Gold);
-            ft.WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/crown.png");
+            //eb.WithColor(_ownerColor);
+            ft.WithIconUrl(_crownIcon);
         }
 
         eb.WithFooter(ft);
@@ -249,13 +253,13 @@ public class DiscordService
         ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
                                   .LocalDateTime
                                   .ToString("yyyy/MM/dd HH:mm:ss"))
-          .WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/wallet.png");
+          .WithIconUrl(_walletIcon);
 
         // From Stream Owner
         if (liveChatPaidSticker.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
         {
-            eb.WithColor(Color.Gold);
-            ft.WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/crown.png");
+            //eb.WithColor(_ownerColor);
+            ft.WithIconUrl(_crownIcon);
         }
 
         eb.WithFooter(ft);
@@ -293,8 +297,7 @@ public class DiscordService
                                               .WithIconUrl(authorPhoto));
 
         // Membership Background Color
-        Color sponsorColor = (Color)System.Drawing.ColorTranslator.FromHtml("#0F9D58");
-        eb.WithColor(sponsorColor);
+        eb.WithColor(_sponsorColor);
 
         // Timestamp
         long timeStamp = long.TryParse(liveChatMembershipItemRenderer.timestampUsec, out long l) ? l / 1000 : 0;
@@ -304,14 +307,6 @@ public class DiscordService
                                   .LocalDateTime
                                   .ToString("yyyy/MM/dd HH:mm:ss"))
           .WithIconUrl(authorBadgeUrl);
-
-        // From Stream Owner
-        // I'm not sure if stream owner can join his own membership?
-        if (liveChatMembershipItemRenderer.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
-        {
-            //eb.WithColor(Color.Gold);
-            ft.WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/crown.png");
-        }
 
         eb.WithFooter(ft);
         return eb;
@@ -332,8 +327,7 @@ public class DiscordService
         eb.WithFields(new EmbedFieldBuilder[] { new EmbedFieldBuilder().WithName("Amount").WithValue(header?.primaryText?.runs?[1].text) });
 
         // Gift Background Color
-        Color sponsorColor = (Color)System.Drawing.ColorTranslator.FromHtml("#0F9D58");
-        eb.WithColor(sponsorColor);
+        eb.WithColor(_sponsorColor);
 
         // Gift Picture
         string? giftThumbUrl = header?.image?.thumbnails?.LastOrDefault()?.url;
@@ -345,13 +339,13 @@ public class DiscordService
         ft.WithText(DateTimeOffset.FromUnixTimeMilliseconds(timeStamp)
                                   .LocalDateTime
                                   .ToString("yyyy/MM/dd HH:mm:ss"))
-          .WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/wallet.png");
+          .WithIconUrl(_giftIcon);
 
         // From Stream Owner
         if (liveChatPurchaseSponsorshipsGift?.authorExternalChannelId == Environment.GetEnvironmentVariable("CHANNEL_ID"))
         {
-            //eb.WithColor(Color.Gold);
-            ft.WithIconUrl("https://raw.githubusercontent.com/jim60105/YoutubeLiveChatToDiscord/master/assets/crown.png");
+            //eb.WithColor(_ownerColor);
+            ft.WithIconUrl(_crownIcon);
         }
 
         eb.WithFooter(ft);
