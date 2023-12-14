@@ -358,11 +358,13 @@ public class DiscordService
         return eb;
     }
 
-    private static EmbedBuilder AppendLowerBumper(ref EmbedBuilder eb, LowerBumper lowerBumper)
-        => eb.WithFields(new EmbedFieldBuilder[]
+    private static EmbedBuilder AppendLowerBumper(ref EmbedBuilder eb, LowerBumper? lowerBumper)
+        => null == lowerBumper || null == lowerBumper.liveChatItemBumperViewModel?.content?.bumperUserEduContentViewModel
+        ? eb
+        : eb.WithFields(new EmbedFieldBuilder[]
         {
             new EmbedFieldBuilder().WithName("LowerBumper")
-                                   .WithValue(lowerBumper.liveChatItemBumperViewModel.content.bumperUserEduContentViewModel.text.content)
+                                   .WithValue(lowerBumper.liveChatItemBumperViewModel.content.bumperUserEduContentViewModel?.text?.content)
         });
 
     private async Task SendMessage(EmbedBuilder eb, string author, CancellationToken cancellationToken)
