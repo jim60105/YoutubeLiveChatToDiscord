@@ -207,6 +207,9 @@ public class DiscordService
         Color bgColor = (Color)System.Drawing.ColorTranslator.FromHtml(Helper.YoutubeColorConverter(liveChatPaidMessage.bodyBackgroundColor));
         eb.WithColor(bgColor);
 
+        // Lower Bumper
+        eb = AppendLowerBumper(ref eb, liveChatPaidMessage.lowerBumper);
+
         // Timestamp
         long timeStamp = long.TryParse(liveChatPaidMessage.timestampUsec, out long l) ? l / 1000 : 0;
         EmbedFooterBuilder ft = new();
@@ -246,6 +249,9 @@ public class DiscordService
         // Super Chat Sticker Picture
         string stickerThumbUrl = Helper.GetOriginalImage("https:" + liveChatPaidSticker.sticker?.thumbnails?.LastOrDefault()?.url);
         eb.WithThumbnailUrl(stickerThumbUrl);
+
+        // Lower Bumper
+        eb = AppendLowerBumper(ref eb, liveChatPaidSticker.lowerBumper);
 
         // Timestamp
         long timeStamp = long.TryParse(liveChatPaidSticker.timestampUsec, out long l) ? l / 1000 : 0;
@@ -351,6 +357,13 @@ public class DiscordService
         eb.WithFooter(ft);
         return eb;
     }
+
+    private static EmbedBuilder AppendLowerBumper(ref EmbedBuilder eb, LowerBumper lowerBumper)
+        => eb.WithFields(new EmbedFieldBuilder[]
+        {
+            new EmbedFieldBuilder().WithName("LowerBumper")
+                                   .WithValue(lowerBumper.liveChatItemBumperViewModel.content.bumperUserEduContentViewModel.text.content)
+        });
 
     private async Task SendMessage(EmbedBuilder eb, string author, CancellationToken cancellationToken)
     {

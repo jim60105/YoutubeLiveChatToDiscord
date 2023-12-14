@@ -45,6 +45,7 @@ public class Chat
     {
         public List<Thumbnail> thumbnails { get; set; }
         public Accessibility accessibility { get; set; }
+        public List<Source> sources { get; set; }
     }
 
     public class Emoji
@@ -178,12 +179,20 @@ public class Chat
         public long timestampColor { get; set; }
         public ContextMenuAccessibility contextMenuAccessibility { get; set; }
         public string trackingParams { get; set; }
+        public HeaderOverlayImage headerOverlayImage { get; set; }
+        public int textInputBackgroundColor { get; set; }
+        public LowerBumper lowerBumper { get; set; }
+        public CreatorHeartButton creatorHeartButton { get; set; }
+        public bool isV2Style { get; set; }
+        public PdgPurchasedNoveltyLoggingDirectives pdgPurchasedNoveltyLoggingDirectives { get; set; }
     }
 
     public class Text
     {
         public string simpleText { get; set; }
         public List<Run> runs { get; set; }
+        public string content { get; set; }
+        public List<StyleRun> styleRuns { get; set; }
     }
 
     public class UrlEndpoint
@@ -260,6 +269,13 @@ public class Chat
         public long backgroundColor { get; set; }
         public long authorNameTextColor { get; set; }
         public string trackingParams { get; set; }
+        // Actually I doesn't find the 1st purchase sticker. These properties are copied from the LiveChatPaidMessageRenderer
+        public HeaderOverlayImage headerOverlayImage { get; set; }
+        public int textInputBackgroundColor { get; set; }
+        public LowerBumper lowerBumper { get; set; }
+        public CreatorHeartButton creatorHeartButton { get; set; }
+        public bool isV2Style { get; set; }
+        public PdgPurchasedNoveltyLoggingDirectives pdgPurchasedNoveltyLoggingDirectives { get; set; }
     }
 
     public class LiveChatMembershipItemRenderer
@@ -496,6 +512,7 @@ public class Chat
     public class ReplayChatItemAction
     {
         public List<Action> actions { get; set; }
+        public string videoOffsetTimeMsec { get; set; }
     }
 
 #pragma warning disable CS8981 // 類型名稱只包含小寫的 ASCII 字元。此類名稱可能保留供此語言使用。
@@ -503,6 +520,7 @@ public class Chat
 #pragma warning restore CS8981 // 類型名稱只包含小寫的 ASCII 字元。此類名稱可能保留供此語言使用。
     {
         public ReplayChatItemAction replayChatItemAction { get; set; }
+        public string clickTrackingParams { get; set; }
         public string videoOffsetTimeMsec { get; set; }
         public bool isLive { get; set; }
     }
@@ -514,13 +532,6 @@ public class Chat
         public Icon icon { get; set; }
         public Text text { get; set; }
         public Subtext subtext { get; set; }
-    }
-
-    public class Root
-    {
-        public ReplayChatItemAction replayChatItemAction { get; set; }
-        public string videoOffsetTimeMsec { get; set; }
-        public bool isLive { get; set; }
     }
 
     public class Subtext
@@ -665,5 +676,133 @@ public class Chat
         public int height { get; set; }
         public int width { get; set; }
         public string resolution { get; set; }
+    }
+
+    public class BorderImageProcessor
+    {
+        public ImageTint imageTint { get; set; }
+    }
+
+    public class BumperUserEduContentViewModel
+    {
+        public Text text { get; set; }
+        public string trackingParams { get; set; }
+        public Image image { get; set; }
+    }
+
+    public class ClientResource
+    {
+        public string imageName { get; set; }
+        public long imageColor { get; set; }
+    }
+
+    public class Content
+    {
+        public BumperUserEduContentViewModel bumperUserEduContentViewModel { get; set; }
+    }
+
+    public class CreatorHeartButton
+    {
+        public CreatorHeartViewModel creatorHeartViewModel { get; set; }
+    }
+
+    public class CreatorHeartViewModel
+    {
+        public CreatorThumbnail creatorThumbnail { get; set; }
+        public HeartedIcon heartedIcon { get; set; }
+        public UnheartedIcon unheartedIcon { get; set; }
+        public string heartedHoverText { get; set; }
+        public string heartedAccessibilityLabel { get; set; }
+        public string unheartedAccessibilityLabel { get; set; }
+        public string engagementStateKey { get; set; }
+        public Gradient gradient { get; set; }
+        public LoggingDirectives loggingDirectives { get; set; }
+    }
+
+    public class CreatorThumbnail
+    {
+        public List<Source> sources { get; set; }
+    }
+
+    public class Gradient
+    {
+        public List<Source> sources { get; set; }
+        public Processor processor { get; set; }
+    }
+
+    public class HeaderOverlayImage
+    {
+        public List<Thumbnail> thumbnails { get; set; }
+    }
+
+    public class HeartedIcon
+    {
+        public List<Source> sources { get; set; }
+    }
+
+    public class ImageTint
+    {
+        public long color { get; set; }
+    }
+
+    public class LiveChatItemBumperViewModel
+    {
+        public Content content { get; set; }
+        public PdgPurchasedBumperLoggingDirectives pdgPurchasedBumperLoggingDirectives { get; set; }
+    }
+
+    public class LoggingDirectives
+    {
+        public string trackingParams { get; set; }
+        public Visibility visibility { get; set; }
+        public bool enableDisplayloggerExperiment { get; set; }
+    }
+
+    public class LowerBumper
+    {
+        public LiveChatItemBumperViewModel liveChatItemBumperViewModel { get; set; }
+    }
+
+    public class PdgPurchasedBumperLoggingDirectives
+    {
+        public LoggingDirectives loggingDirectives { get; set; }
+    }
+
+    public class PdgPurchasedNoveltyLoggingDirectives
+    {
+        public LoggingDirectives loggingDirectives { get; set; }
+    }
+
+    public class Processor
+    {
+        public BorderImageProcessor borderImageProcessor { get; set; }
+    }
+
+    public class Source
+    {
+        public ClientResource clientResource { get; set; }
+        public string url { get; set; }
+    }
+
+    public class StyleRun
+    {
+        public int startIndex { get; set; }
+        public int length { get; set; }
+    }
+
+    public class TimestampText
+    {
+        public string simpleText { get; set; }
+    }
+
+    public class UnheartedIcon
+    {
+        public List<Source> sources { get; set; }
+        public Processor processor { get; set; }
+    }
+
+    public class Visibility
+    {
+        public string types { get; set; }
     }
 }
