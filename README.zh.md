@@ -9,11 +9,14 @@
 
 ## 將 Youtube 聊天室串流至 Discord Webhook
 
-|                                                Youtube Live Chat                                                |     |                                                 Discord Webhook                                                 |
-| :-------------------------------------------------------------------------------------------------------------: | :-: | :-------------------------------------------------------------------------------------------------------------: |
-| ![image](https://user-images.githubusercontent.com/16995691/151545455-af26cbe6-0942-464a-b15e-76ca67dfa142.png) | ➡️  | ![image](https://user-images.githubusercontent.com/16995691/151438025-d0c4a2de-6845-4d64-93db-89afb2f98e45.png) |
-| ![image](https://user-images.githubusercontent.com/16995691/151545035-0dfc65e3-41a4-4342-b0c4-178b53a077d6.png) | ➡️  | ![image](https://user-images.githubusercontent.com/16995691/151545242-651cdbd1-ae8c-4a47-acda-7b9a3b4f59ba.png) |
-| ![image](https://user-images.githubusercontent.com/16995691/151663570-999a5c8c-a336-407e-906a-56399530417b.png) | ➡️  | ![image](https://user-images.githubusercontent.com/16995691/151663574-dc5abbc2-cb5d-4e40-a4ce-bfc39f2a7029.png) |
+|                                                  Youtube Live Chat                                                  |     |                                                   Discord Webhook                                                   |
+| :-----------------------------------------------------------------------------------------------------------------: | :-: | :-----------------------------------------------------------------------------------------------------------------: |
+| ![image](https://github.com/jim60105/YoutubeLiveChatToDiscord/assets/16995691/a979ae6a-8b99-4887-92bb-e08773f9c064) | ➡️  | ![image](https://github.com/jim60105/YoutubeLiveChatToDiscord/assets/16995691/2e58c0b6-6a34-4664-afd9-c16ea378987a) |
+|   ![image](https://user-images.githubusercontent.com/16995691/151545455-af26cbe6-0942-464a-b15e-76ca67dfa142.png)   | ➡️  |   ![image](https://user-images.githubusercontent.com/16995691/151438025-d0c4a2de-6845-4d64-93db-89afb2f98e45.png)   |
+| ![image](https://github.com/jim60105/YoutubeLiveChatToDiscord/assets/16995691/4d8d6417-4dda-4c42-a179-da7557d6a608) | ➡️  | ![image](https://github.com/jim60105/YoutubeLiveChatToDiscord/assets/16995691/77b4aced-0f82-48be-a591-fa351e1e5246) |
+|   ![image](https://user-images.githubusercontent.com/16995691/151663570-999a5c8c-a336-407e-906a-56399530417b.png)   | ➡️  |   ![image](https://user-images.githubusercontent.com/16995691/151663574-dc5abbc2-cb5d-4e40-a4ce-bfc39f2a7029.png)   |
+| ![image](https://github.com/jim60105/YoutubeLiveChatToDiscord/assets/16995691/c62951ef-1268-462f-8955-a5f507b9be43) | ➡️  | ![image](https://github.com/jim60105/YoutubeLiveChatToDiscord/assets/16995691/7307d06e-5cc9-4fd4-a489-2dd21b29abc6) |
+| ![image](https://github.com/jim60105/YoutubeLiveChatToDiscord/assets/16995691/d6d3338f-846e-4ee8-8a74-85d0b4d0479b) | ➡️  | ![image](https://github.com/jim60105/YoutubeLiveChatToDiscord/assets/16995691/6b72474d-99c6-4006-a165-d25ca4cb7474) |
 
 <p align="center">
   <a href="https://github.com/jim60105/YoutubeLiveChatToDiscord/blob/master/README.md">
@@ -22,15 +25,15 @@
   <span>中文</span>
 </p>
 
+- 底層使用 yt-dlp 而不是 youtube api 實作，因此沒有 API 額度限制
+- 此工具在閒置時，會以 10 秒為間隔讀取 yt-dlp 產出的 json 檔案
+- 剛啟動時會等待 1 分鐘跳過舊留言，再由此開始監控
+  > 如果要跳過此等待即時啟動，請傳入環境變數 `SKIP_STARTUP_WAITING`
+- 它可以監控會員限定直播，會自動檢測執行目錄下的 `cookies.txt` 並將其匯入 yt-dlp
 - 不適合用在有大量留言的狀況，此工具是設計來監控 FreeChat  
-  此工具最高每兩秒打一次 discord webhook ，可能造成轉送速度跟不上留言速度
+  它最高每兩秒打一次 discord webhook ，可能會造成轉送速度跟不上留言速度
   > Discord 方面的限制為，同一頻道中每分鐘可呼叫 Webhook 30 次 [ref](https://twitter.com/lolpython/status/967621046277820416)  
   > 若同時啟動複數此工具並推送至同一個頻道，很容易觸發 Discord 冷卻，請留意你的使用環境
-- 底層使用 yt-dlp 來抓資料，並不是 youtube api ，沒有 API 額度問題
-- 此工具在閒置時，讀取 yt-dlp 寫的 json 檔案間隔為 10 秒
-- 啟動時會等待 1 分鐘，使 yt-dlp 下載舊留言，再由此開始監控
-  > 如果要跳過此 1 分鐘，請傳入環境變數 `SKIP_STARTUP_WAITING`
-- 在程式同一層若存在名為 `cookies.txt` 的檔案，就會讀入 yt-dlp，使能在會員限定直播使用
 
 ## 會員限定 (需登入) 的影片
 
