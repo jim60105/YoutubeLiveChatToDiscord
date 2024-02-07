@@ -1,6 +1,6 @@
 # Youtube Live Chat To Discord
 
-[![CodeFactor](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/badge/master?style=for-the-badge)](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/overview/master)
+[![CodeFactor](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/badge/master)](https://www.codefactor.io/repository/github/jim60105/youtubelivechattodiscord/overview/master) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fjim60105%2FYoutubeLiveChatToDiscord.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fjim60105%2FYoutubeLiveChatToDiscord?ref=badge_small)
 
 > [!CAUTION]  
 > Please take note of the **AGPLv3** license that we are using.  
