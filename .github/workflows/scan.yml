@@ -22,7 +22,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Run Trivy vulnerability scanner for Microsoft official image
-        uses: aquasecurity/trivy-action@0.14.0
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           image-ref: "ghcr.io/jim60105/youtubelivechattodiscord:latest"
           vuln-type: "os,library"
@@ -33,9 +33,9 @@ jobs:
           output: "trivy-results-microsoft.html"
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: trivy-results
+          name: trivy-results-microsoft
           path: trivy-results-microsoft.html
           retention-days: 90
 
@@ -52,7 +52,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Run Trivy vulnerability scanner for UBI image
-        uses: aquasecurity/trivy-action@0.14.0
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           image-ref: "ghcr.io/jim60105/youtubelivechattodiscord:ubi"
           vuln-type: "os,library"
@@ -63,8 +63,8 @@ jobs:
           output: "trivy-results-ubi.html"
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: trivy-results
+          name: trivy-results-ubi
           path: trivy-results-ubi.html
           retention-days: 90
